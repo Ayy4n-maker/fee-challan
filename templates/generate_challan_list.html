@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Generate Challan | IESC</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
+    min-height: 100vh;
+    padding: 30px 15px;
+}
+
+.container {
+    width: 100%;
+    max-width: 1100px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.12);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo {
+    width: 130px;
+    height: 80px;
+    object-fit: contain;
+}
+
+h1 {
+    margin: 5px 0;
+    color: #172554;
+    font-size: 25px;
+}
+
+.subtitle {
+    color: #777;
+    font-size: 13px;
+}
+
+
+/* =========================
+   TOP BAR
+========================= */
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+.search-form {
+    display: flex;
+    gap: 8px;
+}
+
+.search-form input {
+    width: 230px;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    font-size: 13px;
+    outline: none;
+}
+
+.search-form input:focus {
+    border-color: #2563eb;
+}
+
+.button {
+    border: none;
+    padding: 10px 15px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.search {
+    background: #172554;
+    color: white;
+}
+
+.search:hover {
+    background: #2563eb;
+}
+
+.all-challans {
+    background: #16a34a;
+    color: white;
+}
+
+.all-challans:hover {
+    background: #15803d;
+}
+
+.back {
+    background: #e0e7ff;
+    color: #172554;
+}
+
+.back:hover {
+    background: #c7d2fe;
+}
+
+
+/* =========================
+   TABLE
+========================= */
+
+.table-box {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #172554;
+    color: white;
+    padding: 10px;
+    text-align: left;
+    font-size: 11px;
+}
+
+td {
+    padding: 9px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 11px;
+}
+
+tr:hover {
+    background: #f8fafc;
+}
+
+
+/* =========================
+   GENERATE BUTTON
+========================= */
+
+.generate-button {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    padding: 7px 11px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.generate-button:hover {
+    background: #1d4ed8;
+}
+
+
+/* =========================
+   NO RESULTS
+========================= */
+
+.no-records {
+    text-align: center;
+    padding: 40px;
+    color: #777;
+    font-size: 14px;
+}
+
+.clear-search {
+    color: #dc2626;
+    text-decoration: none;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 700px) {
+
+    .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-form {
+        width: 100%;
+    }
+
+    .search-form input {
+        width: 100%;
+    }
+
+    .search-form .button {
+        flex-shrink: 0;
+    }
+
+    .all-challans {
+        text-align: center;
+    }
+
+    .back {
+        text-align: center;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+
+    <!-- =========================
+         HEADER
+    ========================= -->
+
+    <div class="header">
+
+        <img
+            src="{{ url_for('static', filename='logo.png') }}"
+            class="logo"
+            alt="IESC Logo"
+        >
+
+        <h1>Generate Challan</h1>
+
+        <div class="subtitle">
+            IESC Fee Management System
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         TOP BAR
+    ========================= -->
+
+    <div class="top-bar">
+
+
+        <!-- SEARCH STUDENT -->
+
+        <form
+            method="GET"
+            action="/generate-challan"
+            class="search-form"
+        >
+
+            <input
+                type="text"
+                name="student_id"
+                placeholder="Search Student ID"
+                value="{{ search_id or '' }}"
+            >
+
+            <button
+                type="submit"
+                class="button search"
+            >
+                Search
+            </button>
+
+            {% if search_id %}
+
+            <a
+                href="/generate-challan"
+                class="clear-search"
+            >
+                Clear
+            </a>
+
+            {% endif %}
+
+        </form>
+
+
+        <!-- GENERATE ALL -->
+
+        <a
+            href="/students/generate-all"
+            class="button all-challans"
+        >
+            Generate All Challans
+        </a>
+
+
+        <!-- BACK -->
+
+        <a
+            href="/staff"
+            class="button back"
+        >
+            Back to Staff Portal
+        </a>
+
+    </div>
+
+
+    <!-- =========================
+         STUDENT TABLE
+    ========================= -->
+
+    <div class="table-box">
+
+        {% if students %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Student ID</th>
+
+                    <th>Student Name</th>
+
+                    <th>Father Name</th>
+
+                    <th>Roll No</th>
+
+                    <th>Class</th>
+
+                    <th>Section</th>
+
+                    <th>Monthly Fee</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% for student in students %}
+
+                <tr>
+
+                    <td>
+                        {{ "%03d"|format(student.id) }}
+                    </td>
+
+                    <td>
+                        {{ student.student_name }}
+                    </td>
+
+                    <td>
+                        {{ student.father_name }}
+                    </td>
+
+                    <td>
+                        {{ student.roll_no }}
+                    </td>
+
+                    <td>
+                        {{ student.class_name }}
+                    </td>
+
+                    <td>
+                        {{ student.section or "" }}
+                    </td>
+
+                    <td>
+                        Rs. {{ "%.2f"|format(student.monthly_fee or 0) }}
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="/students/generate/{{ student.id }}"
+                            class="generate-button"
+                        >
+                            Generate Challan
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+        <div class="no-records">
+
+            {% if search_id %}
+
+                <h3>Student Not Found</h3>
+
+                <p>
+                    No student was found with Student ID
+                    <strong>{{ search_id }}</strong>.
+                </p>
+
+            {% else %}
+
+                <h3>No Students Found</h3>
+
+                <p>
+                    Please add students before generating challans.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+</div>
+
+</body>
+
+</html>
+

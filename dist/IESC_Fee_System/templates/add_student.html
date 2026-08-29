@@ -1,0 +1,563 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add Student | IESC</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 35px 45px;
+            border-radius: 18px;
+
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 150px;
+            height: 95px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 5px auto;
+        }
+
+        h1 {
+            margin: 0;
+            color: #172554;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-top: 7px;
+            font-size: 14px;
+        }
+
+        .section-title {
+            color: #172554;
+            font-size: 19px;
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 18px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 22px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 7px;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            outline: none;
+            transition: 0.2s;
+            background: white;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 35px;
+        }
+
+        .btn {
+            border: none;
+            padding: 13px 28px;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.25s;
+        }
+
+        .btn-save {
+            background: #172554;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        .btn-cancel:hover {
+            background: #d1d5db;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        @media (max-width: 650px) {
+
+            .container {
+                padding: 30px 22px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: auto;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+
+        <div class="header">
+
+            <img
+                src="{{ url_for('static', filename='logo.png') }}"
+                alt="Irshad Educational Academy Logo"
+                class="logo"
+            >
+
+            <div class="subtitle">
+                Add New Student
+            </div>
+
+        </div>
+
+
+        <!-- STUDENT INFORMATION -->
+
+        <form method="POST" action="/students/add">
+
+            <div class="section-title">
+                Student Information
+            </div>
+
+            <div class="form-grid">
+
+                <!-- STUDENT NAME -->
+
+                <div class="form-group">
+
+                    <label>
+                        Student Name <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="student_name"
+                        placeholder="Enter student's full name"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- ROLL NUMBER -->
+
+                <div class="form-group">
+
+                    <label>
+                        Roll No. <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="roll_no"
+                        placeholder="Enter roll number"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- FATHER NAME -->
+
+                <div class="form-group">
+
+                    <label>
+                        Father's Name <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="father_name"
+                        placeholder="Enter father's name"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- DATE OF BIRTH -->
+
+                <div class="form-group">
+
+                    <label>
+                        Date of Birth
+                    </label>
+
+                    <input
+                        type="date"
+                        name="date_of_birth"
+                    >
+
+                </div>
+
+
+                <!-- GENDER -->
+
+                <div class="form-group">
+
+                    <label>
+                        Gender
+                    </label>
+
+                    <select name="gender">
+
+                        <option value="">
+                            Select Gender
+                        </option>
+
+                        <option value="Male">
+                            Male
+                        </option>
+
+                        <option value="Female">
+                            Female
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- CLASS -->
+
+                <div class="form-group">
+
+                    <label>
+                        Class <span class="required">*</span>
+                    </label>
+
+                    <select name="class_name" required>
+
+                        <option value="">
+                            Select Class
+                        </option>
+
+                        <option value="6">
+                            Class 6
+                        </option>
+
+                        <option value="7">
+                            Class 7
+                        </option>
+
+                        <option value="8">
+                            Class 8
+                        </option>
+
+                        <option value="9">
+                            Class 9
+                        </option>
+
+                        <option value="10">
+                            Class 10
+                        </option>
+
+                        <option value="11">
+                            Class 11
+                        </option>
+
+                        <option value="12">
+                            Class 12
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- SECTION -->
+
+                <div class="form-group">
+
+                    <label>
+                        Section
+                    </label>
+
+                    <input
+                        type="text"
+                        name="section"
+                        placeholder="e.g. A"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- CONTACT INFORMATION -->
+
+            <div class="section-title">
+                Contact Information
+            </div>
+
+            <div class="form-grid">
+
+                <!-- STUDENT CONTACT -->
+
+                <div class="form-group">
+
+                    <label>
+                        Student Contact Number
+                    </label>
+
+                    <input
+                        type="tel"
+                        name="student_phone"
+                        placeholder="03XX-XXXXXXX"
+                    >
+
+                </div>
+
+
+                <!-- PARENT CONTACT -->
+
+                <div class="form-group">
+
+                    <label>
+                        Parent / Guardian Contact <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="tel"
+                        name="parent_phone"
+                        placeholder="03XX-XXXXXXX"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- ADDRESS -->
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Address
+                    </label>
+
+                    <textarea
+                        name="address"
+                        placeholder="Enter student's complete address"
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- FEE INFORMATION -->
+
+            <div class="section-title">
+                Fee Information
+            </div>
+
+            <div class="form-grid">
+
+                <!-- MONTHLY FEE -->
+
+                <div class="form-group">
+
+                    <label>
+                        Monthly Fee (Rupees) <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        name="monthly_fee"
+                        placeholder="Enter monthly fee in rupees"
+                        min="0"
+                        step="1"
+                        required
+                    >
+
+                </div>
+
+            </div>
+            <!-- PREVIOUS EDUCATION -->
+
+            <div class="section-title">
+                Previous Education
+            </div>
+
+            <div class="form-grid">
+
+                <!-- PREVIOUS SCHOOL -->
+
+                <div class="form-group">
+
+                    <label>
+                        Previous School
+                    </label>
+
+                    <input
+                        type="text"
+                        name="previous_school"
+                        placeholder="Enter previous school name"
+                    >
+
+                </div>
+
+
+                <!-- PREVIOUS COACHING -->
+
+                <div class="form-group">
+
+                    <label>
+                        Previous Coaching
+                    </label>
+
+                    <input
+                        type="text"
+                        name="previous_coaching"
+                        placeholder="Enter previous coaching name"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- BUTTONS -->
+
+            <div class="buttons">
+
+                <button
+                    type="submit"
+                    class="btn btn-save"
+                >
+                    Add Student
+                </button>
+
+
+                <a
+                    href="/"
+                    class="btn btn-cancel"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+
+        <!-- FOOTER -->
+
+        <div class="footer">
+
+            Irshad Educational Academy
+            <br>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
+NOTE: This form is for AUTHORIZED Person only 

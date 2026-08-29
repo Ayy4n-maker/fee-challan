@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>All Challans | IESC Fee Management System</title>
+
+<style>
+
+@page {
+    size: A4 portrait;
+    margin: 10mm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f5f9;
+    padding: 25px;
+}
+
+.top-bar {
+    max-width: 1100px;
+    margin: 0 auto 20px auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.button {
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.back {
+    background: #e0e7ff;
+    color: #172554;
+}
+
+.print {
+    background: #172554;
+    color: white;
+}
+
+.print:hover {
+    background: #2563eb;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+}
+
+.challan {
+    width: 210mm;
+    min-height: 277mm;
+    background: white;
+    padding: 8mm;
+    margin: 0 auto 30px auto;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.logo-area {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.logo {
+    width: 100px;
+    height: 65px;
+    object-fit: contain;
+}
+
+.header-line {
+    border-bottom: 2px solid #172554;
+    margin-top: 8px;
+    margin-bottom: 12px;
+}
+
+.copy-section {
+    margin-bottom: 18px;
+}
+
+.info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.info div {
+    border: 1px solid #d1d5db;
+    padding: 7px;
+    font-size: 11px;
+}
+
+.info strong {
+    color: #172554;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #172554;
+    color: white;
+    padding: 8px;
+    text-align: left;
+    font-size: 11px;
+}
+
+th:last-child,
+td:last-child {
+    text-align: right;
+}
+
+td {
+    border: 1px solid #d1d5db;
+    padding: 8px;
+    font-size: 11px;
+}
+
+.total {
+    text-align: right;
+    font-size: 15px;
+    font-weight: bold;
+    color: #172554;
+    margin-top: 10px;
+}
+
+.copy-label {
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #172554;
+    border-top: 2px dashed #777;
+    padding-top: 8px;
+    margin-top: 15px;
+}
+
+.signature-area {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    font-size: 11px;
+}
+
+.signature {
+    width: 30%;
+    text-align: center;
+    border-top: 1px solid #333;
+    padding-top: 5px;
+}
+
+.divider {
+    border-top: 2px dashed #555;
+    margin: 18px 0;
+}
+
+.no-students {
+    background: white;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.no-students h2 {
+    color: #172554;
+}
+
+@media print {
+
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .top-bar {
+        display: none;
+    }
+
+    .container {
+        width: 100%;
+        margin: 0;
+    }
+
+    .challan {
+        width: 190mm;
+        height: 277mm;
+        min-height: 277mm;
+        margin: 0;
+        padding: 6mm;
+        box-shadow: none;
+        page-break-after: always;
+        break-after: page;
+        overflow: hidden;
+    }
+
+    .challan:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+
+}
+
+@media screen and (max-width: 800px) {
+
+    body {
+        padding: 15px;
+    }
+
+    .challan {
+        width: 100%;
+        min-height: auto;
+        padding: 20px;
+    }
+
+    .info {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- =========================
+     TOP BUTTONS
+========================= -->
+
+<div class="top-bar">
+
+
+<a href="/students" class="button back">
+    Back to Students
+</a>
+
+<button
+    onclick="window.print()"
+    class="button print"
+>
+    Print All Challans
+</button>
+
+
+</div>
+
+<div class="container">
+
+{% if challans %}
+
+{% for item in challans %}
+
+<!-- =========================
+     FULL CHALLAN
+========================= -->
+
+<div class="challan">
+
+
+<!-- HEADER -->
+
+<div class="logo-area">
+
+    <img
+        src="{{ url_for('static', filename='logo.png') }}"
+        class="logo"
+        alt="IESC Logo"
+    >
+
+    <div class="header-line"></div>
+
+</div>
+
+
+<!-- =========================
+     PARENT COPY
+========================= -->
+
+<div class="copy-section">
+
+    <div class="info">
+
+        <div>
+            <strong>Student ID:</strong>
+            {{ "%03d"|format(item.student.id) }}
+        </div>
+
+        <div>
+            <strong>Roll No:</strong>
+            {{ item.student.roll_no }}
+        </div>
+
+        <div>
+            <strong>Student Name:</strong>
+            {{ item.student.student_name }}
+        </div>
+
+        <div>
+            <strong>Father Name:</strong>
+            {{ item.student.father_name }}
+        </div>
+
+        <div>
+            <strong>Class:</strong>
+            {{ item.student.class_name }}
+        </div>
+
+        <div>
+            <strong>Section:</strong>
+            {{ item.student.section or "" }}
+        </div>
+
+        <div>
+            <strong>Fee Month:</strong>
+            {{ item.fee_month }}
+        </div>
+
+        <div>
+            <strong>Challan Date:</strong>
+            {{ item.challan_date }}
+        </div>
+
+        <div>
+            <strong>Due Date:</strong>
+            {{ item.due_date }}
+        </div>
+
+    </div>
+
+
+    <!-- FEE TABLE -->
+
+    <table>
+
+        <tr>
+            <th>Fee Description</th>
+            <th>Amount</th>
+        </tr>
+
+        <tr>
+            <td>Tuition Fee</td>
+            <td>
+                Rs. {{ "%.2f"|format(item.tuition_fee) }}
+            </td>
+        </tr>
+
+        <tr>
+            <td>Other Fee</td>
+            <td>
+                Rs. {{ "%.2f"|format(item.other_fee) }}
+            </td>
+        </tr>
+
+        <tr>
+            <td>Late Fee</td>
+            <td>
+                Rs. {{ "%.2f"|format(item.late_fee) }}
+            </td>
+        </tr>
+
+        <tr>
+            <td>Discount</td>
+            <td>
+                Rs. {{ "%.2f"|format(item.discount) }}
+            </td>
+        </tr>
+
+    </table>
+
+
+    <div class="total">
+        Total Payable:
+        Rs. {{ "%.2f"|format(item.total_payable) }}
+    </div>
+
+
+    <div class="signature-area">
+
+        <div class="signature">
+            Cashier
+        </div>
+
+        <div class="signature">
+            Parent Signature
+        </div>
+
+        <div class="signature">
+            Authorized Signature
+        </div>
+
+    </div>
+
+
+    <div class="copy-label">
+        PARENT COPY
+    </div>
+
+</div>
+
+
+<!-- CUT LINE -->
+
+<div class="divider"></div>
+
+
+<!-- =========================
+     SCHOOL COPY
+========================= -->
+
+<div class="copy-section">
+
+    <div class="info">
+
+        <div>
+            <strong>Student ID:</strong>
+            {{ "%03d"|format(item.student.id) }}
+        </div>
+
+        <div>
+            <strong>Roll No:</strong>
+            {{ item.student.roll_no }}
+        </div>
+
+        <div>
+            <strong>Student Name:</strong>
+            {{ item.student.student_name }}
+        </div>
+
+        <div>
+            <strong>Father Name:</strong>
+            {{ item.student.father_name }}
+        </div>
+
+        <div>
+            <strong>Class:</strong>
+            {{ item.student.class_name }}
+        </div>
+
+        <div>
+            <strong>Section:</strong>
+            {{ item.student.section or "" }}
+        </div>
+
+        <div>
+            <strong>Fee Month:</strong>
+            {{ item.fee_month }}
+        </div>
+
+        <div>
+            <strong>Challan Date:</strong>
+            {{ item.challan_date }}
+        </div>
+
+        <div>
+            <strong>Due Date:</strong>
+            {{ item.due_date }}
+        </div>
+
+    </div>
+
+
+    <!-- FEE TABLE -->
+
+    <table>
+
+        <tr>
+            <th>Fee Description</th>
+            <th>Amount</th>
+        </tr>
+
+        <tr>
+            <td>Tuition Fee</td>
+            <td>
+                Rs. {{ "%.2f"|format(item.tuition_fee) }}
+            </td>
+        </tr>
+
+        <tr>
+            <td>Other Fee</td>
+            <td>
+                Rs. {{ "%.2f"|format(item.other_fee) }}
+            </td>
+        </tr>
+
+        <tr>
+            <td>Late Fee</td>
+            <td>
+                Rs. {{ "%.2f"|format(item.late_fee) }}
+            </td>
+        </tr>
+
+        <tr>
+            <td>Discount</td>
+            <td>
+                Rs. {{ "%.2f"|format(item.discount) }}
+            </td>
+        </tr>
+
+    </table>
+
+
+    <div class="total">
+        Total Payable:
+        Rs. {{ "%.2f"|format(item.total_payable) }}
+    </div>
+
+
+    <div class="signature-area">
+
+        <div class="signature">
+            Cashier
+        </div>
+
+        <div class="signature">
+            Received By
+        </div>
+
+        <div class="signature">
+            Authorized Signature
+        </div>
+
+    </div>
+
+
+    <div class="copy-label">
+        SCHOOL COPY
+    </div>
+
+</div>
+
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<!-- =========================
+     NO STUDENTS
+========================= -->
+
+<div class="no-students">
+
+
+<h2>No Students Found</h2>
+
+<p>
+    Please add students before generating all challans.
+</p>
+
+
+</div>
+
+{% endif %}
+
+</div>
+
+</body>
+</html>

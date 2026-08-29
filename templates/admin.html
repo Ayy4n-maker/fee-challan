@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard | IESC</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
+            min-height: 100vh;
+            padding: 30px 15px;
+        }
+
+        /* =====================================================
+           LOGOUT BUTTON
+           ===================================================== */
+
+        .logout-button {
+            position: fixed;
+            top: 20px;
+            right: 25px;
+
+            background: #dc2626;
+            color: white;
+
+            padding: 10px 16px;
+
+            border-radius: 8px;
+
+            text-decoration: none;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+            transition: 0.25s;
+
+            z-index: 1000;
+        }
+
+        .logout-button:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            width: 130px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        h1 {
+            margin: 5px 0;
+            color: #172554;
+            font-size: 26px;
+        }
+
+        .subtitle {
+            color: #777;
+            font-size: 13px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .card-title {
+            color: #777;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            color: #172554;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .money {
+            color: #15803d;
+        }
+
+        .actions {
+            background: white;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .actions h2 {
+            margin-top: 0;
+            color: #172554;
+            font-size: 18px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 11px 16px;
+            background: #172554;
+            color: white;
+            text-decoration: none;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            background: #2563eb;
+        }
+
+        .back {
+            background: #64748b;
+        }
+
+        @media (max-width: 800px) {
+
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 500px) {
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .logout-button {
+                top: 12px;
+                right: 12px;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- =====================================================
+     ADMIN LOGOUT
+     ===================================================== -->
+
+<a
+    href="{{ url_for('admin_logout') }}"
+    class="logout-button"
+    onclick="return confirm('Are you sure you want to logout?');"
+>
+    Logout
+</a>
+
+
+<div class="container">
+
+    <div class="header">
+
+        <img
+            src="{{ url_for('static', filename='logo.png') }}"
+            class="logo"
+            alt="IESC Logo"
+        >
+
+        <h1>Admin Dashboard</h1>
+
+        <div class="subtitle">
+            IESC Fee Management System
+        </div>
+
+    </div>
+
+
+    <div class="cards">
+
+        <div class="card">
+
+            <div class="card-title">
+                TOTAL STUDENTS
+            </div>
+
+            <div class="card-value">
+                {{ total_students }}
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                TOTAL MONEY RECEIVED
+            </div>
+
+            <div class="card-value money">
+                Rs. {{ "%.2f"|format(total_received) }}
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                PAID PAYMENTS
+            </div>
+
+            <div class="card-value">
+                {{ total_paid }}
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                UNPAID PAYMENTS
+            </div>
+
+            <div class="card-value">
+                {{ total_unpaid }}
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                LATE FEES RECEIVED
+            </div>
+
+            <div class="card-value money">
+                Rs. {{ "%.2f"|format(total_late_fee) }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="actions">
+
+        <h2>Admin Options</h2>
+
+        <div class="buttons">
+
+            <a href="/fee-payments" class="button">
+                View Fee Payments
+            </a>
+
+            <a href="/students" class="button">
+                View Students
+            </a>
+
+            <a href="/staff" class="button">
+                Staff Portal
+            </a>
+
+            <a href="/" class="button back">
+                Back to Main Page
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
+

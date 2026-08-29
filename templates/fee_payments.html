@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Fee Payments | IESC</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
+    min-height: 100vh;
+    padding: 30px 15px;
+}
+
+.container {
+    width: 100%;
+    max-width: 1400px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.12);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo {
+    width: 130px;
+    height: 80px;
+    object-fit: contain;
+}
+
+h1 {
+    margin: 5px 0;
+    color: #172554;
+    font-size: 25px;
+}
+
+.subtitle {
+    color: #777;
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   TOP BAR
+===================================================== */
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.search-form {
+    display: flex;
+    gap: 8px;
+}
+
+.search-form input {
+    width: 230px;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    font-size: 13px;
+}
+
+.button {
+    border: none;
+    padding: 10px 15px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.search {
+    background: #172554;
+    color: white;
+}
+
+.back {
+    background: #e0e7ff;
+    color: #172554;
+}
+
+
+/* =====================================================
+   CATEGORY BUTTONS
+===================================================== */
+
+.categories {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.category {
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #172554;
+    transition: 0.2s;
+}
+
+.category:hover {
+    background: #e2e8f0;
+}
+
+.category.active {
+    background: #172554;
+    color: white;
+    border-color: #172554;
+}
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.table-box {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1250px;
+}
+
+th {
+    background: #172554;
+    color: white;
+    padding: 10px;
+    text-align: left;
+    font-size: 11px;
+}
+
+td {
+    padding: 9px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 11px;
+}
+
+tr:hover {
+    background: #f8fafc;
+}
+
+.amount {
+    text-align: right;
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status {
+    font-weight: bold;
+    padding: 5px 8px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.paid {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.unpaid {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.overdue {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+
+/* =====================================================
+   ACTION BUTTONS
+===================================================== */
+
+.action-box {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pay-button {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.pay-button:hover {
+    background: #15803d;
+}
+
+.reverse-button {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.reverse-button:hover {
+    background: #d97706;
+}
+
+.delete-button {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background: #b91c1c;
+}
+
+
+/* =====================================================
+   NO RECORDS
+===================================================== */
+
+.no-records {
+    text-align: center;
+    padding: 40px;
+    color: #777;
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+
+    .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-form {
+        width: 100%;
+    }
+
+    .search-form input {
+        width: 100%;
+    }
+
+    .search-form .button {
+        flex-shrink: 0;
+    }
+
+    .back {
+        text-align: center;
+    }
+
+    .categories {
+        justify-content: center;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- =================================================
+         HEADER
+    ================================================== -->
+
+    <div class="header">
+
+        <img
+            src="{{ url_for('static', filename='logo.png') }}"
+            class="logo"
+            alt="IESC Logo"
+        >
+
+        <h1>
+            Fee Payments
+        </h1>
+
+        <div class="subtitle">
+            IESC Fee Management System
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         SEARCH + BACK
+    ================================================== -->
+
+    <div class="top-bar">
+
+
+        <form
+            method="GET"
+            action="{{ url_for('fee_payments') }}"
+            class="search-form"
+        >
+
+            <input
+                type="text"
+                name="student_id"
+                placeholder="Search Student ID"
+                value="{{ search_id }}"
+            >
+
+            <input
+                type="hidden"
+                name="status"
+                value="{{ selected_status }}"
+            >
+
+            <button
+                type="submit"
+                class="button search"
+            >
+                Search
+            </button>
+
+        </form>
+
+
+        <a
+            href="{{ url_for('staff') }}"
+            class="button back"
+        >
+            Back to Staff Portal
+        </a>
+
+
+    </div>
+
+
+    <!-- =================================================
+         FEE CATEGORIES
+    ================================================== -->
+
+    <div class="categories">
+
+
+        <a
+            href="{{ url_for('fee_payments', status='ALL', student_id=search_id) }}"
+            class="category {% if selected_status == 'ALL' %}active{% endif %}"
+        >
+            All Records
+        </a>
+
+
+        <a
+            href="{{ url_for('fee_payments', status='PAID', student_id=search_id) }}"
+            class="category {% if selected_status == 'PAID' %}active{% endif %}"
+        >
+            Paid
+        </a>
+
+
+        <a
+            href="{{ url_for('fee_payments', status='UNPAID', student_id=search_id) }}"
+            class="category {% if selected_status == 'UNPAID' %}active{% endif %}"
+        >
+            Unpaid
+        </a>
+
+
+        <a
+            href="{{ url_for('fee_payments', status='OVERDUE', student_id=search_id) }}"
+            class="category {% if selected_status == 'OVERDUE' %}active{% endif %}"
+        >
+            Overdue
+        </a>
+
+
+    </div>
+
+
+    <!-- =================================================
+         TABLE
+    ================================================== -->
+
+    <div class="table-box">
+
+
+        {% if payments %}
+
+
+        <table>
+
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Student</th>
+
+                    <th>Father Name</th>
+
+                    <th>Class</th>
+
+                    <th>Fee Month</th>
+
+                    <th>Tuition</th>
+
+                    <th>Late Fee</th>
+
+                    <th>Other Fee</th>
+
+                    <th>Discount</th>
+
+                    <th>Total</th>
+
+                    <th>Due Date</th>
+
+                    <th>Status</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+            {% for payment in payments %}
+
+
+                <tr>
+
+
+                    <!-- STUDENT ID -->
+
+                    <td>
+
+                        {{ "%03d"|format(payment.student_id) }}
+
+                    </td>
+
+
+                    <!-- STUDENT -->
+
+                    <td>
+
+                        {{ payment.student_name }}
+
+                    </td>
+
+
+                    <!-- FATHER -->
+
+                    <td>
+
+                        {{ payment.father_name }}
+
+                    </td>
+
+
+                    <!-- CLASS -->
+
+                    <td>
+
+                        {{ payment.class_name }}
+
+                    </td>
+
+
+                    <!-- MONTH -->
+
+                    <td>
+
+                        {{ payment.fee_month }}
+
+                    </td>
+
+
+                    <!-- TUITION -->
+
+                    <td class="amount">
+
+                        Rs.
+                        {{ "%.2f"|format(payment.tuition_fee or 0) }}
+
+                    </td>
+
+
+                    <!-- LATE FEE -->
+
+                    <td class="amount">
+
+                        Rs.
+                        {{ "%.2f"|format(payment.late_fee or 0) }}
+
+                    </td>
+
+
+                    <!-- OTHER -->
+
+                    <td class="amount">
+
+                        Rs.
+                        {{ "%.2f"|format(payment.other_fee or 0) }}
+
+                    </td>
+
+
+                    <!-- DISCOUNT -->
+
+                    <td class="amount">
+
+                        Rs.
+                        {{ "%.2f"|format(payment.discount or 0) }}
+
+                    </td>
+
+
+                    <!-- TOTAL -->
+
+                    <td class="amount">
+
+                        <strong>
+
+                            Rs.
+                            {{ "%.2f"|format(payment.total_payable or 0) }}
+
+                        </strong>
+
+                    </td>
+
+
+                    <!-- DUE DATE -->
+
+                    <td>
+
+                        {{ payment.due_date }}
+
+                    </td>
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+
+                        {% if payment.status == "PAID" %}
+
+
+                            <span class="status paid">
+
+                                PAID
+
+                            </span>
+
+
+                        {% elif payment.status == "OVERDUE" %}
+
+
+                            <span class="status overdue">
+
+                                OVERDUE
+
+                            </span>
+
+
+                        {% else %}
+
+
+                            <span class="status unpaid">
+
+                                UNPAID
+
+                            </span>
+
+
+                        {% endif %}
+
+
+                    </td>
+
+
+                    <!-- ACTION -->
+
+                    <td>
+
+
+                        <div class="action-box">
+
+
+                            {% if payment.status == "PAID" %}
+
+
+                                <!-- REVERSE PAYMENT -->
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('mark_unpaid', payment_id=payment.id) }}"
+                                    onsubmit="return confirm('Are you sure you want to reverse this payment and mark it as UNPAID?');"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="reverse-button"
+                                    >
+
+                                        Reverse
+
+                                    </button>
+
+                                </form>
+
+
+                            {% else %}
+
+
+                                <!-- MARK PAID -->
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('mark_paid', payment_id=payment.id) }}"
+                                    onsubmit="return confirm('Mark this fee as PAID?');"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="pay-button"
+                                    >
+
+                                        Mark as Paid
+
+                                    </button>
+
+                                </form>
+
+
+                            {% endif %}
+
+
+                            <!-- DELETE -->
+
+                            <form
+                                method="POST"
+                                action="{{ url_for('delete_fee_payment', payment_id=payment.id) }}"
+                                onsubmit="return confirm('WARNING: This will permanently delete this fee record. Continue?');"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="delete-button"
+                                >
+
+                                    Delete
+
+                                </button>
+
+                            </form>
+
+
+                        </div>
+
+
+                    </td>
+
+
+                </tr>
+
+
+            {% endfor %}
+
+
+            </tbody>
+
+
+        </table>
+
+
+        {% else %}
+
+
+        <div class="no-records">
+
+            <h3>
+                No Fee Records Found
+            </h3>
+
+            {% if selected_status == "PAID" %}
+
+                <p>
+                    There are no paid fee records.
+                </p>
+
+            {% elif selected_status == "UNPAID" %}
+
+                <p>
+                    There are no unpaid fee records.
+                </p>
+
+            {% elif selected_status == "OVERDUE" %}
+
+                <p>
+                    There are no overdue fee records.
+                </p>
+
+            {% else %}
+
+                <p>
+                    Generate a challan first and the fee
+                    record will appear here.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>
+

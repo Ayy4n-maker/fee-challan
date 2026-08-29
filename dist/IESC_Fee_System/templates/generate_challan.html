@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Fee Challan | IESC</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            background: white;
+            padding: 10mm;
+        }
+
+        .challan {
+            width: 100%;
+            height: 128mm;
+            border: 2px solid #172554;
+            padding: 6mm;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #172554;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 55px;
+            object-fit: contain;
+            margin-right: 15px;
+        }
+
+        .school-info {
+            flex: 1;
+        }
+
+        .school-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #172554;
+        }
+
+        .school-full-name {
+            font-size: 13px;
+            color: #555;
+            margin-top: 3px;
+        }
+
+        .system-name {
+            font-size: 12px;
+            color: #777;
+            margin-top: 2px;
+        }
+
+        .copy-title {
+            text-align: center;
+            background: #172554;
+            color: white;
+            padding: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 9px;
+        }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 20px;
+            margin-bottom: 9px;
+        }
+
+        .info-box {
+            font-size: 12px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #172554;
+        }
+
+        .fee-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .fee-table th {
+            background: #172554;
+            color: white;
+            padding: 6px;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .fee-table td {
+            border: 1px solid #cbd5e1;
+            padding: 5px 6px;
+            font-size: 12px;
+        }
+
+        .fee-table th:last-child,
+        .fee-table td:last-child {
+            text-align: right;
+        }
+
+        .total-row td {
+            background: #e0e7ff;
+            color: #172554;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .dates {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .date-box {
+            border: 1px solid #cbd5e1;
+            padding: 6px;
+            font-size: 11px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            margin-top: 10px;
+            font-size: 10px;
+        }
+
+        .signature {
+            width: 130px;
+            text-align: center;
+            border-top: 1px solid #555;
+            padding-top: 4px;
+        }
+
+        .divider {
+            height: 11mm;
+            position: relative;
+            border-top: 2px dashed #555;
+            margin-top: 5mm;
+            margin-bottom: 5mm;
+        }
+
+        .divider-text {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 12px;
+            font-size: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .buttons {
+            width: 210mm;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .print {
+            background: #172554;
+            color: white;
+        }
+
+        .back {
+            background: #e0e7ff;
+            color: #172554;
+        }
+
+        .print:hover {
+            background: #2563eb;
+        }
+
+        .back:hover {
+            background: #c7d2fe;
+        }
+
+        @media print {
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            body {
+                background: white;
+            }
+
+            .a4-page {
+                width: 210mm;
+                height: 297mm;
+                margin: 0;
+                padding: 10mm;
+            }
+
+            .buttons {
+                display: none;
+            }
+
+            .challan {
+                break-inside: avoid;
+            }
+        }
+
+        @media screen and (max-width: 800px) {
+
+            .a4-page {
+                width: 100%;
+                min-height: auto;
+                margin: 0;
+                padding: 15px;
+            }
+
+            .challan {
+                height: auto;
+                margin-bottom: 20px;
+            }
+
+            .student-info {
+                grid-template-columns: 1fr;
+            }
+
+            .dates {
+                grid-template-columns: 1fr;
+            }
+
+            .buttons {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="a4-page">
+
+        <div class="challan">
+
+            <div class="header">
+
+                <img
+                    src="{{ url_for('static', filename='logo.png') }}"
+                    class="logo"
+                    alt="IESC Logo"
+                >
+
+                <div class="school-info">
+
+                    <div class="school-name">
+                        IESC
+                    </div>
+
+                    <div class="school-full-name">
+                        Irshad Educational Academy
+                    </div>
+
+                    <div class="system-name">
+                        Fee Management System
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="copy-title">
+                STUDENT COPY
+            </div>
+
+            <div class="student-info">
+
+                <div class="info-box">
+                    <span class="info-label">Student Name:</span>
+                    {{ student.student_name }}
+                </div>
+
+                <div class="info-box">
+                    <span class="info-label">Student ID:</span>
+                    {{ '%03d'|format(student.id) }}
+                </div>
+
+                <div class="info-box">
+                    <span class="info-label">Father Name:</span>
+                    {{ student.father_name }}
+                </div>
+
+                <div class="info-box">
+                    <span class="info-label">Class:</span>
+                    {{ student.class_name }}
+                </div>
+
+                <div class="info-box">
+                    <span class="info-label">Roll No:</span>
+                    {{ student.roll_no }}
+                </div>
+
+                <div class="info-box">
+                    <span class="info-label">Fee Month:</span>
+                    {{ fee_month }}
+                </div>
+
+            </div>
+
+            <table class="fee-table">
+
+                <tr>
+                    <th>Fee Description</th>
+                    <th>Amount</th>
+                </tr>
+
+                <tr>
+                    <td>Tuition Fee</td>
+                    <td>Rs. {{ "%.2f"|format(tuition_fee) }}</td>
+                </tr>
+
+                <tr>
+                    <td>Admission / Other Fee</td>
+                    <td>Rs. {{ "%.2f"|format(other_fee) }}</td>
+                </tr>
+
+                <tr>
+                    <td>Late Fee</td>
+                    <td>Rs. {{ "%.2f"|format(late_fee) }}</td>
+                </tr>
+
+                <tr>
+                    <td>Discount</td>
+                    <td>Rs. {{ "%.2f"|format(discount) }}</td>
+                </tr>
+
+                <tr class="total-row">
+                    <td>Total Payable</td>
+                    <td>Rs. {{ "%.2f"|format(total_payable) }}</td>
+                </tr>
+
+            </table>
+
+            <div class="dates">
+
+                <div class="date-box">
+                    <strong>Fee Month:</strong>
+                    {{ fee_month }}
+                </div>
+
+                <div class="date-box">
+                    <strong>Due Date:</strong>
+                    __________________
+                </div>
+
+            </div>
+
+            <div class="footer">
+
+                <div>
+                    Please retain this copy for your record.
+                </div>
+
+                <div class="signature">
+                    Authorized Signature
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="divider">
+            <div class="divider-text">
+                CUT HERE
+            </div>
+        </div>
+
+
+        <div class="challan">
+
+            <div class="header">
+
+                <img
+                    src="{{ url_for('static', filename='logo.png') }}"
+                    class="logo"
+                    alt="IESC Logo"
+                >
+
+                <div class="school-info">
+
+                    <div class="school-name">
+                        IESC
+                    </div>
+
+                    <div class="school-full-name">
+                        Irshad Educational Academy
+                    </div>
+
+                    <div class="system-name">
+                        Fee Management System
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="copy-title">
+                SCHOOL COPY
+            </div>
+
+            <div class="student-info">
+
+                <div class="info-box">
+                    <span class="info-label">Student Name:</span>
+                    {{ student.student_name }}
+                </div>
+
+                <div class="info-box">
+                    <span class="info-label">Student ID:</span>
+                    {{ '%03d'|format(student.id) }}
+                </div>
+
+                <div class="info-box">
+                    <span class="info-label">Father Name:</span>
+                    {{ student.father_name }}
+                </div>
+
+                <div class="info-box">
+                    <span class="info-label">Class:</span>
+                    {{ student.class_name }}
+                </div>
+
+                <div class="info-box">
+                    <span class="info-label">Roll No:</span>
+                    {{ student.roll_no }}
+                </div>
+
+                <div class="info-box">
+                    <span class="info-label">Fee Month:</span>
+                    {{ fee_month }}
+                </div>
+
+            </div>
+
+            <table class="fee-table">
+
+                <tr>
+                    <th>Fee Description</th>
+                    <th>Amount</th>
+                </tr>
+
+                <tr>
+                    <td>Tuition Fee</td>
+                    <td>Rs. {{ "%.2f"|format(tuition_fee) }}</td>
+                </tr>
+
+                <tr>
+                    <td>Admission / Other Fee</td>
+                    <td>Rs. {{ "%.2f"|format(other_fee) }}</td>
+                </tr>
+
+                <tr>
+                    <td>Late Fee</td>
+                    <td>Rs. {{ "%.2f"|format(late_fee) }}</td>
+                </tr>
+
+                <tr>
+                    <td>Discount</td>
+                    <td>Rs. {{ "%.2f"|format(discount) }}</td>
+                </tr>
+
+                <tr class="total-row">
+                    <td>Total Payable</td>
+                    <td>Rs. {{ "%.2f"|format(total_payable) }}</td>
+                </tr>
+
+            </table>
+
+            <div class="dates">
+
+                <div class="date-box">
+                    <strong>Fee Month:</strong>
+                    {{ fee_month }}
+                </div>
+
+                <div class="date-box">
+                    <strong>Due Date:</strong>
+                    __________________
+                </div>
+
+            </div>
+
+            <div class="footer">
+
+                <div>
+                    School record copy.
+                </div>
+
+                <div class="signature">
+                    Authorized Signature
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="buttons">
+
+        <button
+            class="back"
+            onclick="window.location.href='/students'"
+        >
+            Back
+        </button>
+
+        <button
+            class="print"
+            onclick="window.print()"
+        >
+            Print Challan
+        </button>
+
+    </div>
+
+</body>
+</html>

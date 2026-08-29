@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Generate Challan | IESC Fee Management System</title>
+
+<style>
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
+        min-height: 100vh;
+        padding: 35px 20px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 900px;
+        margin: auto;
+        background: white;
+        padding: 35px;
+        border-radius: 18px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .logo {
+        width: 150px;
+        height: 95px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto 5px auto;
+    }
+
+    h1 {
+        margin: 0;
+        color: #172554;
+        font-size: 28px;
+    }
+
+    .subtitle {
+        color: #666;
+        margin-top: 7px;
+        font-size: 14px;
+    }
+
+    h2 {
+        color: #172554;
+        margin-bottom: 25px;
+        font-size: 21px;
+    }
+
+    .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #172554;
+    }
+
+    input[readonly] {
+        background: #f8fafc;
+        color: #333;
+    }
+
+    .amount {
+        font-weight: bold;
+    }
+
+    .buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    button {
+        flex: 1;
+        padding: 13px;
+        border: none;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.25s;
+    }
+
+    .generate {
+        background: #172554;
+        color: white;
+    }
+
+    .generate:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+    }
+
+    .back {
+        background: #e0e7ff;
+        color: #172554;
+    }
+
+    .back:hover {
+        background: #c7d2fe;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 25px;
+        font-size: 12px;
+        color: #888;
+    }
+
+    @media (max-width: 650px) {
+
+        body {
+            padding: 20px 12px;
+        }
+
+        .container {
+            padding: 25px 18px;
+        }
+
+        .row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .buttons {
+            flex-direction: column;
+        }
+
+    }
+
+</style>
+
+
+</head>
+
+<body>
+
+<div class="container">
+
+
+<div class="header">
+
+    <img
+        src="{{ url_for('static', filename='logo.png') }}"
+        alt="Irshad Educational Academy Logo"
+        class="logo"
+    >
+
+    <h1>IESC</h1>
+
+    <div class="subtitle">
+        Fee Management System
+    </div>
+
+</div>
+
+
+<h2>Generate Fee Challan</h2>
+
+
+<form method="POST">
+
+
+    <div class="row">
+
+        <div class="form-group">
+
+            <label>Student Name</label>
+
+            <input
+                type="text"
+                value="{{ student.student_name }}"
+                readonly
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Student ID</label>
+
+            <input
+                type="text"
+                value="{{ '%03d'|format(student.id) }}"
+                readonly
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="form-group">
+
+            <label>Class</label>
+
+            <input
+                type="text"
+                value="Class {{ student.class_name }}"
+                readonly
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Fee Date</label>
+
+            <input
+                type="date"
+                name="fee_month"
+                value="{{ default_date }}"
+                required
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="form-group">
+
+            <label>Tuition Fee</label>
+
+            <input
+                type="number"
+                name="tuition_fee"
+                class="amount"
+                min="0"
+                step="1"
+                value="{{ student.monthly_fee or 0 }}"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Admission / Other Fee</label>
+
+            <input
+                type="number"
+                name="other_fee"
+                class="amount"
+                min="0"
+                step="1"
+                value="0"
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="form-group">
+
+            <label>Late Fee</label>
+
+            <input
+                type="number"
+                name="late_fee"
+                class="amount"
+                min="0"
+                step="1"
+                value="0"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Discount</label>
+
+            <input
+                type="number"
+                name="discount"
+                class="amount"
+                min="0"
+                step="1"
+                value="0"
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="buttons">
+
+        <button
+            type="button"
+            class="back"
+            onclick="window.location.href='/students'"
+        >
+            Back
+        </button>
+
+
+        <button
+            type="submit"
+            class="generate"
+        >
+            Generate Challan
+        </button>
+
+    </div>
+
+</form>
+
+
+<div class="footer">
+
+    Irshad Educational Academy
+    <br>
+    Academic Session 2026–2027
+
+</div>
+
+</div>
+
+</body>
+
+</html>
