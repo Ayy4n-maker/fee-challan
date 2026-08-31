@@ -284,6 +284,45 @@
 
         </a>
 
+
+        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
+
+            <div class="card-title">
+                ANNUAL FEES RECEIVED
+            </div>
+
+            <div class="card-value money">
+                Rs. {{ "%.2f"|format(total_annual_fee) }}
+            </div>
+
+        </a>
+
+
+        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
+
+            <div class="card-title">
+                STATIONERY / EXAM FEES
+            </div>
+
+            <div class="card-value money">
+                Rs. {{ "%.2f"|format(total_stationery_fee) }}
+            </div>
+
+        </a>
+
+
+        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
+
+            <div class="card-title">
+                TOTAL DISCOUNTS GIVEN
+            </div>
+
+            <div class="card-value" style="color: #dc2626; font-weight: bold; font-size: 24px;">
+                Rs. {{ "%.2f"|format(total_discount) }}
+            </div>
+
+        </a>
+
     </div>
 
 

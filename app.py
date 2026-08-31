@@ -45,10 +45,19 @@ def short_id(doc_id):
 # HELPER — convert Firestore document snapshot to dict
 # ==========================================================
 
-def doc_to_dict(doc):
-    """Convert a Firestore DocumentSnapshot to a plain dict with 'id' field."""
-    d = doc.to_dict()
+def doc_to_dict(doc, default_index=1):
+    """Convert a Firestore DocumentSnapshot to a plain dict with clean 3-digit serial display_id."""
+    d = doc.to_dict() or {}
     d["id"] = doc.id
+    serial = d.get("serial_id")
+    if not serial:
+        serial = default_index
+    try:
+        serial = int(serial)
+    except (ValueError, TypeError):
+        serial = default_index
+    d["serial_id"] = serial
+    d["display_id"] = "%03d" % serial
     return d
 
 
@@ -183,6 +192,9 @@ def admin():
     total_paid = 0
     total_unpaid = 0
     total_late_fee = 0.0
+    total_annual_fee = 0.0
+    total_stationery_fee = 0.0
+    total_discount = 0.0
 
     for doc in payments_docs:
 
@@ -201,6 +213,18 @@ def admin():
                 p.get("late_fee") or 0
             )
 
+            total_annual_fee += float(
+                p.get("annual_fee") or 0
+            )
+
+            total_stationery_fee += float(
+                p.get("stationery_fee") or 0
+            )
+
+            total_discount += float(
+                p.get("discount") or 0
+            )
+
         else:
 
             total_unpaid += 1
@@ -216,7 +240,13 @@ def admin():
 
         total_unpaid=total_unpaid,
 
-        total_late_fee=total_late_fee
+        total_late_fee=total_late_fee,
+
+        total_annual_fee=total_annual_fee,
+
+        total_stationery_fee=total_stationery_fee,
+
+        total_discount=total_discount
     )
 
 
@@ -281,7 +311,7 @@ def staff_login():
 # ==========================================================
 
 @app.route("/staff")
-@staff_required
+@login_required
 def staff():
 
     db = get_firestore_db()
@@ -323,14 +353,15 @@ def students():
     docs = db.collection("students").get()
 
     student_list = [
-        doc_to_dict(doc)
-        for doc in docs
+        doc_to_dict(doc, default_index=idx)
+        for idx, doc in enumerate(docs, start=1)
     ]
 
-    # Sort by class (numeric) then by name
+    # Sort by class (numeric) then by serial_id
     student_list.sort(
         key=lambda s: (
             int(s.get("class_name") or 0),
+            int(s.get("serial_id") or 0),
             s.get("student_name") or ""
         )
     )
@@ -356,28 +387,29 @@ def generate_challan_list():
 
     db = get_firestore_db()
 
+    docs = db.collection("students").get()
+
+    all_students = [
+        doc_to_dict(doc, default_index=idx)
+        for idx, doc in enumerate(docs, start=1)
+    ]
+
     if search_id:
-
-        # Search by Firestore document ID (exact match)
-        doc = db.collection("students").document(search_id).get()
-
-        if doc.exists:
-            student_list = [doc_to_dict(doc)]
-        else:
-            student_list = []
-
-    else:
-
-        docs = db.collection("students").get()
-
+        clean = search_id.strip()
         student_list = [
-            doc_to_dict(doc)
-            for doc in docs
+            s for s in all_students
+            if s["id"] == clean
+            or s["display_id"] == clean
+            or str(s.get("serial_id")) == clean.lstrip("0")
+            or clean.lower() in s.get("student_name", "").lower()
+            or clean.lower() in s.get("roll_no", "").lower()
         ]
-
+    else:
+        student_list = all_students
         student_list.sort(
             key=lambda s: (
                 int(s.get("class_name") or 0),
+                int(s.get("serial_id") or 0),
                 s.get("student_name") or ""
             )
         )
@@ -461,7 +493,21 @@ def add_student():
 
         db = get_firestore_db()
 
+        # Calculate next sequential serial_id
+        all_students_docs = db.collection("students").get()
+        serials = []
+        for s_doc in all_students_docs:
+            s_dict = s_doc.to_dict() or {}
+            if s_dict.get("serial_id"):
+                try:
+                    serials.append(int(s_dict["serial_id"]))
+                except (ValueError, TypeError):
+                    pass
+
+        next_serial = max(serials, default=len(all_students_docs)) + 1
+
         db.collection("students").add({
+            "serial_id":         next_serial,
             "student_name":      student_name,
             "roll_no":           roll_no,
             "father_name":       father_name,
