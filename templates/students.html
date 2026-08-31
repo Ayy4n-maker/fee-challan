@@ -206,8 +206,8 @@ alt="IESC Logo"
 
 <div class="top-buttons">
 
-<a href="{{ url_for('staff') }}" class="button home">
-    Home
+<a href="{% if session.get('admin_logged_in') %}/admin{% else %}/staff{% endif %}" class="button home">
+    Dashboard
 </a>
 
 <a href="/students/add" class="button add">

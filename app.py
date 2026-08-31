@@ -52,10 +52,6 @@ def doc_to_dict(doc):
     return d
 
 
-# ==========================================================
-# LOGIN PROTECTION
-# ==========================================================
-
 def admin_required(function):
 
     @wraps(function)
@@ -86,6 +82,24 @@ def staff_required(function):
         return function(*args, **kwargs)
 
     return decorated_function
+
+
+def login_required(function):
+
+    @wraps(function)
+    def decorated_function(*args, **kwargs):
+
+        if not (session.get("admin_logged_in") is True or session.get("staff_logged_in") is True):
+
+            return redirect(
+                url_for("home")
+            )
+
+        return function(*args, **kwargs)
+
+    return decorated_function
+
+
 
 
 # ==========================================================
@@ -301,7 +315,7 @@ def staff_logout():
 # ==========================================================
 
 @app.route("/students")
-@staff_required
+@login_required
 def students():
 
     db = get_firestore_db()
@@ -333,7 +347,7 @@ def students():
 # ==========================================================
 
 @app.route("/generate-challan")
-@staff_required
+@login_required
 def generate_challan_list():
 
     search_id = request.args.get(
@@ -383,7 +397,7 @@ def generate_challan_list():
     "/students/add",
     methods=["GET", "POST"]
 )
-@staff_required
+@login_required
 def add_student():
 
     if request.method == "POST":
@@ -480,7 +494,7 @@ def add_student():
     "/students/update/<student_id>",
     methods=["GET", "POST"]
 )
-@staff_required
+@login_required
 def update_student(student_id):
 
     db = get_firestore_db()
@@ -586,7 +600,7 @@ def update_student(student_id):
     "/students/delete/<student_id>",
     methods=["POST"]
 )
-@staff_required
+@login_required
 def delete_student(student_id):
 
     db = get_firestore_db()
@@ -625,7 +639,7 @@ def delete_student(student_id):
     "/students/generate/<student_id>",
     methods=["GET", "POST"]
 )
-@staff_required
+@login_required
 def generate_challan(student_id):
 
     db = get_firestore_db()
@@ -807,7 +821,7 @@ def generate_challan(student_id):
     "/students/generate-all",
     methods=["GET", "POST"]
 )
-@staff_required
+@login_required
 def generate_all_challans():
 
     db = get_firestore_db()
@@ -900,7 +914,7 @@ def generate_all_challans():
 # ==========================================================
 
 @app.route("/fee-payments")
-@staff_required
+@login_required
 def fee_payments():
 
     search_id = request.args.get(
@@ -1007,7 +1021,7 @@ def fee_payments():
     "/fee-payments/mark-paid/<payment_id>",
     methods=["POST"]
 )
-@staff_required
+@login_required
 def mark_paid(payment_id):
 
     db = get_firestore_db()
@@ -1046,7 +1060,7 @@ def mark_paid(payment_id):
     "/fee-payments/mark-unpaid/<payment_id>",
     methods=["POST"]
 )
-@staff_required
+@login_required
 def mark_unpaid(payment_id):
 
     db = get_firestore_db()
@@ -1076,7 +1090,7 @@ def mark_unpaid(payment_id):
     "/fee-payments/delete/<payment_id>",
     methods=["POST"]
 )
-@staff_required
+@login_required
 def delete_fee_payment(payment_id):
 
     db = get_firestore_db()

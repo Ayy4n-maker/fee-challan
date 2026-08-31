@@ -220,7 +220,7 @@
 
     <div class="cards">
 
-        <div class="card">
+        <a href="/students" class="card" style="text-decoration: none;">
 
             <div class="card-title">
                 TOTAL STUDENTS
@@ -230,10 +230,10 @@
                 {{ total_students }}
             </div>
 
-        </div>
+        </a>
 
 
-        <div class="card">
+        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
 
             <div class="card-title">
                 TOTAL MONEY RECEIVED
@@ -243,10 +243,10 @@
                 Rs. {{ "%.2f"|format(total_received) }}
             </div>
 
-        </div>
+        </a>
 
 
-        <div class="card">
+        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
 
             <div class="card-title">
                 PAID PAYMENTS
@@ -256,10 +256,10 @@
                 {{ total_paid }}
             </div>
 
-        </div>
+        </a>
 
 
-        <div class="card">
+        <a href="/fee-payments?status=UNPAID" class="card" style="text-decoration: none;">
 
             <div class="card-title">
                 UNPAID PAYMENTS
@@ -269,10 +269,10 @@
                 {{ total_unpaid }}
             </div>
 
-        </div>
+        </a>
 
 
-        <div class="card">
+        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
 
             <div class="card-title">
                 LATE FEES RECEIVED
@@ -282,26 +282,46 @@
                 Rs. {{ "%.2f"|format(total_late_fee) }}
             </div>
 
-        </div>
+        </a>
 
     </div>
 
 
     <div class="actions">
 
-        <h2>Admin Options</h2>
+        <h2>Admin Management Options</h2>
 
         <div class="buttons">
 
             <a href="/fee-payments" class="button">
-                View Fee Payments
+                View All Fee Payments
+            </a>
+
+            <a href="/fee-payments?status=PAID" class="button" style="background:#16a34a;">
+                View Paid Fees
+            </a>
+
+            <a href="/fee-payments?status=UNPAID" class="button" style="background:#d97706;">
+                View Unpaid Fees
+            </a>
+
+            <a href="/fee-payments?status=OVERDUE" class="button" style="background:#dc2626;">
+                View Overdue Fees
             </a>
 
             <a href="/students" class="button">
-                View Students
+                View Students List
             </a>
 
-            <a href="/staff" class="button">
+            <a href="/students/add" class="button">
+                Add New Student
+            </a>
+
+            <a href="/generate-challan" class="button">
+                Generate Challans
+            </a>
+
+            <a href="/staff" class="button" style="background:#4b5563;">
                 Staff Portal
             </a>
 

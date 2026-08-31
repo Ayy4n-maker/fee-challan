@@ -324,10 +324,10 @@ tr:hover {
         <!-- BACK -->
 
         <a
-            href="/staff"
+            href="{% if session.get('admin_logged_in') %}/admin{% else %}/staff{% endif %}"
             class="button back"
         >
-            Back to Staff Portal
+            Back to Dashboard
         </a>
 
     </div>
