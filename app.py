@@ -693,17 +693,21 @@ def generate_challan(student_id):
         # Check for existing record (same student + same month)
         # ----------------------------------------------------------
 
-        existing_docs = (
+        all_student_payments = (
             db.collection("fee_payments")
             .where("student_id", "==", student_id)
-            .where("fee_month",   "==", fee_month)
-            .limit(1)
             .get()
         )
 
-        if existing_docs:
+        existing_doc = None
+        for p_doc in all_student_payments:
+            if p_doc.to_dict().get("fee_month") == fee_month:
+                existing_doc = p_doc
+                break
 
-            existing = doc_to_dict(existing_docs[0])
+        if existing_doc:
+
+            existing = doc_to_dict(existing_doc)
 
             if existing["status"] == "PAID":
 
@@ -741,7 +745,7 @@ def generate_challan(student_id):
             # Existing unpaid/overdue — update the record
             # ----------------------------------------------------------
 
-            existing_docs[0].reference.update({
+            existing_doc.reference.update({
                 "challan_date":  challan_date.isoformat(),
                 "due_date":      due_date.isoformat(),
                 "tuition_fee":   tuition_fee,
@@ -826,83 +830,131 @@ def generate_all_challans():
 
     db = get_firestore_db()
 
-    docs = db.collection("students").get()
-
-    student_list = [doc_to_dict(doc) for doc in docs]
-
-    student_list.sort(
-        key=lambda s: (
-            int(s.get("class_name") or 0),
-            s.get("student_name") or ""
-        )
-    )
-
     challan_date = date.today()
     due_date     = challan_date + timedelta(days=10)
     fee_month    = challan_date.strftime("%B %Y")
 
-    challans = []
+    if request.method == "POST":
 
-    for student in student_list:
+        fee_date_input = request.form.get("fee_date") or challan_date.isoformat()
+        try:
+            parsed_date  = date.fromisoformat(fee_date_input)
+            challan_date = parsed_date
+            fee_month    = parsed_date.strftime("%B %Y")
+        except (ValueError, TypeError):
+            pass
 
-        tuition_fee  = float(student.get("monthly_fee") or 0)
-        other_fee    = 0.0
-        late_fee     = 0.0
-        discount     = 0.0
+        due_date_input = request.form.get("due_date") or (challan_date + timedelta(days=10)).isoformat()
+        try:
+            due_date = date.fromisoformat(due_date_input)
+        except (ValueError, TypeError):
+            due_date = challan_date + timedelta(days=10)
 
-        total_payable = max(
-            tuition_fee + other_fee + late_fee - discount,
-            0.0
+        try:
+            other_fee = float(request.form.get("other_fee") or 0)
+        except (ValueError, TypeError):
+            other_fee = 0.0
+
+        try:
+            annual_fee = float(request.form.get("annual_fee") or 0)
+        except (ValueError, TypeError):
+            annual_fee = 0.0
+
+        try:
+            stationery_fee = float(request.form.get("stationery_fee") or 0)
+        except (ValueError, TypeError):
+            stationery_fee = 0.0
+
+        try:
+            late_fee = float(request.form.get("late_fee") or 0)
+        except (ValueError, TypeError):
+            late_fee = 0.0
+
+        try:
+            discount = float(request.form.get("discount") or 0)
+        except (ValueError, TypeError):
+            discount = 0.0
+
+        combined_other_fee = other_fee + annual_fee + stationery_fee
+
+        docs = db.collection("students").get()
+        student_list = [doc_to_dict(doc) for doc in docs]
+        student_list.sort(
+            key=lambda s: (
+                int(s.get("class_name") or 0),
+                s.get("student_name") or ""
+            )
         )
 
-        # ----------------------------------------------------------
-        # Check for existing record — do NOT create duplicates
-        # ----------------------------------------------------------
+        challans = []
 
-        existing_docs = (
-            db.collection("fee_payments")
-            .where("student_id", "==", student["id"])
-            .where("fee_month",   "==", fee_month)
-            .limit(1)
-            .get()
-        )
+        for student in student_list:
 
-        if not existing_docs:
+            tuition_fee = float(student.get("monthly_fee") or 0)
+            total_payable = max(
+                tuition_fee + combined_other_fee + late_fee - discount,
+                0.0
+            )
 
-            db.collection("fee_payments").add({
-                "student_id":    student["id"],
-                "student_name":  student.get("student_name", ""),
-                "father_name":   student.get("father_name", ""),
-                "roll_no":       student.get("roll_no", ""),
-                "class_name":    student.get("class_name", ""),
-                "fee_month":     fee_month,
-                "challan_date":  challan_date.isoformat(),
-                "due_date":      due_date.isoformat(),
-                "tuition_fee":   tuition_fee,
-                "other_fee":     other_fee,
-                "late_fee":      late_fee,
-                "discount":      discount,
-                "total_payable": total_payable,
-                "status":        "UNPAID",
-                "payment_date":  None,
-                "amount_received": 0.0,
+            # Safe single-field query to avoid index exceptions
+            all_student_payments = (
+                db.collection("fee_payments")
+                .where("student_id", "==", student["id"])
+                .get()
+            )
+
+            existing = None
+            for p_doc in all_student_payments:
+                if p_doc.to_dict().get("fee_month") == fee_month:
+                    existing = p_doc.to_dict()
+                    break
+
+            if not existing:
+                db.collection("fee_payments").add({
+                    "student_id":      student["id"],
+                    "student_name":    student.get("student_name", ""),
+                    "father_name":     student.get("father_name", ""),
+                    "roll_no":         student.get("roll_no", ""),
+                    "class_name":      student.get("class_name", ""),
+                    "fee_month":       fee_month,
+                    "challan_date":    challan_date.isoformat(),
+                    "due_date":        due_date.isoformat(),
+                    "tuition_fee":     tuition_fee,
+                    "other_fee":       combined_other_fee,
+                    "annual_fee":      annual_fee,
+                    "stationery_fee":  stationery_fee,
+                    "late_fee":        late_fee,
+                    "discount":        discount,
+                    "total_payable":   total_payable,
+                    "status":          "UNPAID",
+                    "payment_date":    None,
+                    "amount_received": 0.0,
+                })
+
+            challans.append({
+                "student":        student,
+                "challan_date":   challan_date.strftime("%d-%m-%Y"),
+                "due_date":       due_date.strftime("%d-%m-%Y"),
+                "fee_month":      fee_month,
+                "tuition_fee":    tuition_fee,
+                "other_fee":      other_fee,
+                "annual_fee":     annual_fee,
+                "stationery_fee": stationery_fee,
+                "late_fee":       late_fee,
+                "discount":       discount,
+                "total_payable":  total_payable,
             })
 
-        challans.append({
-            "student":      student,
-            "challan_date": challan_date.strftime("%d-%m-%Y"),
-            "due_date":     due_date.strftime("%d-%m-%Y"),
-            "fee_month":    fee_month,
-            "tuition_fee":  tuition_fee,
-            "other_fee":    other_fee,
-            "late_fee":     late_fee,
-            "discount":     discount,
-            "total_payable": total_payable,
-        })
+        return render_template(
+            "all_challans.html",
+            challans=challans
+        )
 
+    # GET request — show bulk customization options form
     return render_template(
-        "all_challans.html",
-        challans=challans
+        "bulk_challan_form.html",
+        default_date=challan_date.isoformat(),
+        due_date=due_date.strftime("%d-%m-%Y")
     )
 
 

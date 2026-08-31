@@ -253,8 +253,8 @@ td {
 <div class="top-bar">
 
 
-<a href="/students" class="button back">
-    Back to Students
+<a href="{% if session.get('admin_logged_in') %}/admin{% else %}/generate-challan{% endif %}" class="button back">
+    Back to Dashboard
 </a>
 
 <button
@@ -305,7 +305,7 @@ td {
 
         <div>
             <strong>Student ID:</strong>
-            {{ "%03d"|format(item.student.id) }}
+            {{ item.student.id[:8] }}
         </div>
 
         <div>
@@ -362,31 +362,43 @@ td {
 
         <tr>
             <td>Tuition Fee</td>
-            <td>
-                Rs. {{ "%.2f"|format(item.tuition_fee) }}
-            </td>
+            <td>Rs. {{ "%.2f"|format(item.tuition_fee) }}</td>
         </tr>
 
+        {% if item.other_fee > 0 %}
         <tr>
-            <td>Other Fee</td>
-            <td>
-                Rs. {{ "%.2f"|format(item.other_fee) }}
-            </td>
+            <td>Admission / Additional Fee</td>
+            <td>Rs. {{ "%.2f"|format(item.other_fee) }}</td>
         </tr>
+        {% endif %}
 
+        {% if item.annual_fee and item.annual_fee > 0 %}
+        <tr>
+            <td>Annual Fee</td>
+            <td>Rs. {{ "%.2f"|format(item.annual_fee) }}</td>
+        </tr>
+        {% endif %}
+
+        {% if item.stationery_fee and item.stationery_fee > 0 %}
+        <tr>
+            <td>Stationery / Exam Fee</td>
+            <td>Rs. {{ "%.2f"|format(item.stationery_fee) }}</td>
+        </tr>
+        {% endif %}
+
+        {% if item.late_fee > 0 %}
         <tr>
             <td>Late Fee</td>
-            <td>
-                Rs. {{ "%.2f"|format(item.late_fee) }}
-            </td>
+            <td>Rs. {{ "%.2f"|format(item.late_fee) }}</td>
         </tr>
+        {% endif %}
 
+        {% if item.discount > 0 %}
         <tr>
             <td>Discount</td>
-            <td>
-                Rs. {{ "%.2f"|format(item.discount) }}
-            </td>
+            <td>Rs. {{ "%.2f"|format(item.discount) }}</td>
         </tr>
+        {% endif %}
 
     </table>
 
@@ -436,7 +448,7 @@ td {
 
         <div>
             <strong>Student ID:</strong>
-            {{ "%03d"|format(item.student.id) }}
+            {{ item.student.id[:8] }}
         </div>
 
         <div>
@@ -493,31 +505,43 @@ td {
 
         <tr>
             <td>Tuition Fee</td>
-            <td>
-                Rs. {{ "%.2f"|format(item.tuition_fee) }}
-            </td>
+            <td>Rs. {{ "%.2f"|format(item.tuition_fee) }}</td>
         </tr>
 
+        {% if item.other_fee > 0 %}
         <tr>
-            <td>Other Fee</td>
-            <td>
-                Rs. {{ "%.2f"|format(item.other_fee) }}
-            </td>
+            <td>Admission / Additional Fee</td>
+            <td>Rs. {{ "%.2f"|format(item.other_fee) }}</td>
         </tr>
+        {% endif %}
 
+        {% if item.annual_fee and item.annual_fee > 0 %}
+        <tr>
+            <td>Annual Fee</td>
+            <td>Rs. {{ "%.2f"|format(item.annual_fee) }}</td>
+        </tr>
+        {% endif %}
+
+        {% if item.stationery_fee and item.stationery_fee > 0 %}
+        <tr>
+            <td>Stationery / Exam Fee</td>
+            <td>Rs. {{ "%.2f"|format(item.stationery_fee) }}</td>
+        </tr>
+        {% endif %}
+
+        {% if item.late_fee > 0 %}
         <tr>
             <td>Late Fee</td>
-            <td>
-                Rs. {{ "%.2f"|format(item.late_fee) }}
-            </td>
+            <td>Rs. {{ "%.2f"|format(item.late_fee) }}</td>
         </tr>
+        {% endif %}
 
+        {% if item.discount > 0 %}
         <tr>
             <td>Discount</td>
-            <td>
-                Rs. {{ "%.2f"|format(item.discount) }}
-            </td>
+            <td>Rs. {{ "%.2f"|format(item.discount) }}</td>
         </tr>
+        {% endif %}
 
     </table>
 
