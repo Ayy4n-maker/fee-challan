@@ -1,145 +1,55 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import sqlite3
 from datetime import date, timedelta
 import os
 from functools import wraps
 
+from firebase_config import get_firestore_db
+
 
 app = Flask(__name__)
 
-# ==========================================================
-# SECRET KEY
-# ==========================================================
-
-app.secret_key = "IESC_FEE_SYSTEM_SECRET_KEY_2026"
-
 
 # ==========================================================
-# DATABASE
+# SECRET KEY  (set SECRET_KEY env variable in production)
 # ==========================================================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE = os.path.join(BASE_DIR, "fee_system.db")
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "IESC_FEE_SYSTEM_SECRET_KEY_2026"
+)
 
 
 # ==========================================================
 # LOGIN DETAILS
-# CHANGE THESE LATER IF YOU WANT
+# Set these as environment variables in Vercel / production.
+# CHANGE THE DEFAULTS before deploying.
 # ==========================================================
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "admin123"
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
-STAFF_USERNAME = "staff"
-STAFF_PASSWORD = "staff123"
-
-
-# ==========================================================
-# DATABASE CONNECTION
-# ==========================================================
-
-def get_db():
-
-    conn = sqlite3.connect(
-        DATABASE,
-        timeout=10
-    )
-
-    conn.row_factory = sqlite3.Row
-
-    return conn
+STAFF_USERNAME = os.environ.get("STAFF_USERNAME", "staff")
+STAFF_PASSWORD = os.environ.get("STAFF_PASSWORD", "staff123")
 
 
 # ==========================================================
-# DATABASE INITIALIZATION
+# HELPER — short display ID from Firestore document ID
 # ==========================================================
 
-def init_db():
+def short_id(doc_id):
+    """Return the first 8 characters of a Firestore document ID."""
+    return str(doc_id)[:8].upper()
 
-    conn = get_db()
 
-    # ------------------------------------------------------
-    # STUDENTS TABLE
-    # ------------------------------------------------------
+# ==========================================================
+# HELPER — convert Firestore document snapshot to dict
+# ==========================================================
 
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS students (
-
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-            student_name TEXT NOT NULL,
-
-            roll_no TEXT NOT NULL,
-
-            father_name TEXT NOT NULL,
-
-            date_of_birth TEXT,
-
-            gender TEXT,
-
-            class_name TEXT NOT NULL,
-
-            section TEXT,
-
-            student_phone TEXT,
-
-            parent_phone TEXT NOT NULL,
-
-            address TEXT,
-
-            monthly_fee REAL NOT NULL,
-
-            fee_month TEXT,
-
-            previous_school TEXT,
-
-            previous_coaching TEXT
-        )
-    """)
-
-    # ------------------------------------------------------
-    # FEE PAYMENTS TABLE
-    # ------------------------------------------------------
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS fee_payments (
-
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-            student_id INTEGER NOT NULL,
-
-            fee_month TEXT NOT NULL,
-
-            challan_date TEXT NOT NULL,
-
-            due_date TEXT NOT NULL,
-
-            tuition_fee REAL DEFAULT 0,
-
-            other_fee REAL DEFAULT 0,
-
-            late_fee REAL DEFAULT 0,
-
-            discount REAL DEFAULT 0,
-
-            total_payable REAL DEFAULT 0,
-
-            status TEXT DEFAULT 'UNPAID',
-
-            payment_date TEXT,
-
-            amount_received REAL DEFAULT 0,
-
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-
-            FOREIGN KEY(student_id)
-                REFERENCES students(id)
-        )
-    """)
-
-    conn.commit()
-
-    conn.close()
+def doc_to_dict(doc):
+    """Convert a Firestore DocumentSnapshot to a plain dict with 'id' field."""
+    d = doc.to_dict()
+    d["id"] = doc.id
+    return d
 
 
 # ==========================================================
@@ -151,7 +61,7 @@ def admin_required(function):
     @wraps(function)
     def decorated_function(*args, **kwargs):
 
-        if session.get("admin_logged_in") != True:
+        if session.get("admin_logged_in") is not True:
 
             return redirect(
                 url_for("admin_login")
@@ -167,7 +77,7 @@ def staff_required(function):
     @wraps(function)
     def decorated_function(*args, **kwargs):
 
-        if session.get("staff_logged_in") != True:
+        if session.get("staff_logged_in") is not True:
 
             return redirect(
                 url_for("staff_login")
@@ -203,13 +113,11 @@ def admin_login():
     if request.method == "POST":
 
         username = request.form.get(
-            "username",
-            ""
+            "username", ""
         ).strip()
 
         password = request.form.get(
-            "password",
-            ""
+            "password", ""
         )
 
         if (
@@ -218,7 +126,6 @@ def admin_login():
         ):
 
             session.clear()
-
             session["admin_logged_in"] = True
 
             return redirect(
@@ -243,44 +150,46 @@ def admin_login():
 @admin_required
 def admin():
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    total_students = conn.execute("""
-        SELECT COUNT(*)
-        FROM students
-    """).fetchone()[0]
+    # ----------------------------------------------------------
+    # COUNT STUDENTS
+    # ----------------------------------------------------------
 
-    total_received = conn.execute("""
-        SELECT COALESCE(
-            SUM(amount_received),
-            0
-        )
-        FROM fee_payments
-        WHERE status = 'PAID'
-    """).fetchone()[0]
+    students_docs = db.collection("students").get()
+    total_students = len(students_docs)
 
-    total_paid = conn.execute("""
-        SELECT COUNT(*)
-        FROM fee_payments
-        WHERE status = 'PAID'
-    """).fetchone()[0]
+    # ----------------------------------------------------------
+    # PAYMENT STATS — fetch all payments once and aggregate
+    # ----------------------------------------------------------
 
-    total_unpaid = conn.execute("""
-        SELECT COUNT(*)
-        FROM fee_payments
-        WHERE status != 'PAID'
-    """).fetchone()[0]
+    payments_docs = db.collection("fee_payments").get()
 
-    total_late_fee = conn.execute("""
-        SELECT COALESCE(
-            SUM(late_fee),
-            0
-        )
-        FROM fee_payments
-        WHERE status = 'PAID'
-    """).fetchone()[0]
+    total_received = 0.0
+    total_paid = 0
+    total_unpaid = 0
+    total_late_fee = 0.0
 
-    conn.close()
+    for doc in payments_docs:
+
+        p = doc.to_dict()
+        status = p.get("status", "UNPAID")
+
+        if status == "PAID":
+
+            total_received += float(
+                p.get("amount_received") or 0
+            )
+
+            total_paid += 1
+
+            total_late_fee += float(
+                p.get("late_fee") or 0
+            )
+
+        else:
+
+            total_unpaid += 1
 
     return render_template(
         "admin.html",
@@ -324,13 +233,11 @@ def staff_login():
     if request.method == "POST":
 
         username = request.form.get(
-            "username",
-            ""
+            "username", ""
         ).strip()
 
         password = request.form.get(
-            "password",
-            ""
+            "password", ""
         )
 
         if (
@@ -339,7 +246,6 @@ def staff_login():
         ):
 
             session.clear()
-
             session["staff_logged_in"] = True
 
             return redirect(
@@ -364,14 +270,11 @@ def staff_login():
 @staff_required
 def staff():
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    total_students = conn.execute("""
-        SELECT COUNT(*)
-        FROM students
-    """).fetchone()[0]
-
-    conn.close()
+    total_students = len(
+        db.collection("students").get()
+    )
 
     return render_template(
         "index.html",
@@ -401,17 +304,22 @@ def staff_logout():
 @staff_required
 def students():
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    student_list = conn.execute("""
-        SELECT *
-        FROM students
-        ORDER BY
-            CAST(class_name AS INTEGER) ASC,
-            student_name ASC
-    """).fetchall()
+    docs = db.collection("students").get()
 
-    conn.close()
+    student_list = [
+        doc_to_dict(doc)
+        for doc in docs
+    ]
+
+    # Sort by class (numeric) then by name
+    student_list.sort(
+        key=lambda s: (
+            int(s.get("class_name") or 0),
+            s.get("student_name") or ""
+        )
+    )
 
     return render_template(
         "students.html",
@@ -429,41 +337,36 @@ def students():
 def generate_challan_list():
 
     search_id = request.args.get(
-        "student_id",
-        ""
+        "student_id", ""
     ).strip()
 
-    conn = get_db()
+    db = get_firestore_db()
 
     if search_id:
 
-        try:
+        # Search by Firestore document ID (exact match)
+        doc = db.collection("students").document(search_id).get()
 
-            student_id = int(search_id)
-
-            student_list = conn.execute("""
-                SELECT *
-                FROM students
-                WHERE id = ?
-            """, (
-                student_id,
-            )).fetchall()
-
-        except ValueError:
-
+        if doc.exists:
+            student_list = [doc_to_dict(doc)]
+        else:
             student_list = []
 
     else:
 
-        student_list = conn.execute("""
-            SELECT *
-            FROM students
-            ORDER BY
-                CAST(class_name AS INTEGER) ASC,
-                student_name ASC
-        """).fetchall()
+        docs = db.collection("students").get()
 
-    conn.close()
+        student_list = [
+            doc_to_dict(doc)
+            for doc in docs
+        ]
+
+        student_list.sort(
+            key=lambda s: (
+                int(s.get("class_name") or 0),
+                s.get("student_name") or ""
+            )
+        )
 
     return render_template(
         "generate_challan_list.html",
@@ -486,53 +389,43 @@ def add_student():
     if request.method == "POST":
 
         student_name = request.form.get(
-            "student_name",
-            ""
+            "student_name", ""
         )
 
         roll_no = request.form.get(
-            "roll_no",
-            ""
+            "roll_no", ""
         )
 
         father_name = request.form.get(
-            "father_name",
-            ""
+            "father_name", ""
         )
 
         date_of_birth = request.form.get(
-            "date_of_birth",
-            ""
+            "date_of_birth", ""
         )
 
         gender = request.form.get(
-            "gender",
-            ""
+            "gender", ""
         )
 
         class_name = request.form.get(
-            "class_name",
-            ""
+            "class_name", ""
         )
 
         section = request.form.get(
-            "section",
-            ""
+            "section", ""
         )
 
         student_phone = request.form.get(
-            "student_phone",
-            ""
+            "student_phone", ""
         )
 
         parent_phone = request.form.get(
-            "parent_phone",
-            ""
+            "parent_phone", ""
         )
 
         address = request.form.get(
-            "address",
-            ""
+            "address", ""
         )
 
         monthly_fee = request.form.get(
@@ -540,68 +433,35 @@ def add_student():
         ) or "0"
 
         previous_school = request.form.get(
-            "previous_school",
-            ""
+            "previous_school", ""
         )
 
         previous_coaching = request.form.get(
-            "previous_coaching",
-            ""
+            "previous_coaching", ""
         )
 
         try:
+            monthly_fee = float(monthly_fee)
+        except (ValueError, TypeError):
+            monthly_fee = 0.0
 
-            monthly_fee = float(
-                monthly_fee
-            )
+        db = get_firestore_db()
 
-        except:
-
-            monthly_fee = 0
-
-        conn = get_db()
-
-        conn.execute("""
-            INSERT INTO students (
-                student_name,
-                roll_no,
-                father_name,
-                date_of_birth,
-                gender,
-                class_name,
-                section,
-                student_phone,
-                parent_phone,
-                address,
-                monthly_fee,
-                fee_month,
-                previous_school,
-                previous_coaching
-            )
-            VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?
-            )
-        """, (
-            student_name,
-            roll_no,
-            father_name,
-            date_of_birth,
-            gender,
-            class_name,
-            section,
-            student_phone,
-            parent_phone,
-            address,
-            monthly_fee,
-            None,
-            previous_school,
-            previous_coaching
-        ))
-
-        conn.commit()
-
-        conn.close()
+        db.collection("students").add({
+            "student_name":      student_name,
+            "roll_no":           roll_no,
+            "father_name":       father_name,
+            "date_of_birth":     date_of_birth,
+            "gender":            gender,
+            "class_name":        class_name,
+            "section":           section,
+            "student_phone":     student_phone,
+            "parent_phone":      parent_phone,
+            "address":           address,
+            "monthly_fee":       monthly_fee,
+            "previous_school":   previous_school,
+            "previous_coaching": previous_coaching,
+        })
 
         return redirect(
             url_for("students")
@@ -617,78 +477,62 @@ def add_student():
 # ==========================================================
 
 @app.route(
-    "/students/update/<int:student_id>",
+    "/students/update/<student_id>",
     methods=["GET", "POST"]
 )
 @staff_required
 def update_student(student_id):
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    student = conn.execute("""
-        SELECT *
-        FROM students
-        WHERE id = ?
-    """, (
-        student_id,
-    )).fetchone()
+    ref = db.collection("students").document(student_id)
+    doc = ref.get()
 
-    if student is None:
-
-        conn.close()
-
+    if not doc.exists:
         return "Student not found", 404
+
+    student = doc_to_dict(doc)
 
     if request.method == "POST":
 
         student_name = request.form.get(
-            "student_name",
-            ""
+            "student_name", ""
         )
 
         roll_no = request.form.get(
-            "roll_no",
-            ""
+            "roll_no", ""
         )
 
         father_name = request.form.get(
-            "father_name",
-            ""
+            "father_name", ""
         )
 
         date_of_birth = request.form.get(
-            "date_of_birth",
-            ""
+            "date_of_birth", ""
         )
 
         gender = request.form.get(
-            "gender",
-            ""
+            "gender", ""
         )
 
         class_name = request.form.get(
-            "class_name",
-            ""
+            "class_name", ""
         )
 
         section = request.form.get(
-            "section",
-            ""
+            "section", ""
         )
 
         student_phone = request.form.get(
-            "student_phone",
-            ""
+            "student_phone", ""
         )
 
         parent_phone = request.form.get(
-            "parent_phone",
-            ""
+            "parent_phone", ""
         )
 
         address = request.form.get(
-            "address",
-            ""
+            "address", ""
         )
 
         monthly_fee = request.form.get(
@@ -696,70 +540,37 @@ def update_student(student_id):
         ) or "0"
 
         previous_school = request.form.get(
-            "previous_school",
-            ""
+            "previous_school", ""
         )
 
         previous_coaching = request.form.get(
-            "previous_coaching",
-            ""
+            "previous_coaching", ""
         )
 
         try:
+            monthly_fee = float(monthly_fee)
+        except (ValueError, TypeError):
+            monthly_fee = 0.0
 
-            monthly_fee = float(
-                monthly_fee
-            )
-
-        except:
-
-            monthly_fee = 0
-
-        conn.execute("""
-            UPDATE students
-
-            SET
-                student_name = ?,
-                roll_no = ?,
-                father_name = ?,
-                date_of_birth = ?,
-                gender = ?,
-                class_name = ?,
-                section = ?,
-                student_phone = ?,
-                parent_phone = ?,
-                address = ?,
-                monthly_fee = ?,
-                previous_school = ?,
-                previous_coaching = ?
-
-            WHERE id = ?
-        """, (
-            student_name,
-            roll_no,
-            father_name,
-            date_of_birth,
-            gender,
-            class_name,
-            section,
-            student_phone,
-            parent_phone,
-            address,
-            monthly_fee,
-            previous_school,
-            previous_coaching,
-            student_id
-        ))
-
-        conn.commit()
-
-        conn.close()
+        ref.update({
+            "student_name":      student_name,
+            "roll_no":           roll_no,
+            "father_name":       father_name,
+            "date_of_birth":     date_of_birth,
+            "gender":            gender,
+            "class_name":        class_name,
+            "section":           section,
+            "student_phone":     student_phone,
+            "parent_phone":      parent_phone,
+            "address":           address,
+            "monthly_fee":       monthly_fee,
+            "previous_school":   previous_school,
+            "previous_coaching": previous_coaching,
+        })
 
         return redirect(
             url_for("students")
         )
-
-    conn.close()
 
     return render_template(
         "update_student.html",
@@ -772,32 +583,32 @@ def update_student(student_id):
 # ==========================================================
 
 @app.route(
-    "/students/delete/<int:student_id>",
+    "/students/delete/<student_id>",
     methods=["POST"]
 )
 @staff_required
 def delete_student(student_id):
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    # Delete fee records belonging to student first
-    conn.execute("""
-        DELETE FROM fee_payments
-        WHERE student_id = ?
-    """, (
-        student_id,
-    ))
+    # ----------------------------------------------------------
+    # Delete all fee records belonging to this student first
+    # ----------------------------------------------------------
 
-    conn.execute("""
-        DELETE FROM students
-        WHERE id = ?
-    """, (
-        student_id,
-    ))
+    payments = (
+        db.collection("fee_payments")
+        .where("student_id", "==", student_id)
+        .get()
+    )
 
-    conn.commit()
+    for payment in payments:
+        payment.reference.delete()
 
-    conn.close()
+    # ----------------------------------------------------------
+    # Delete the student document
+    # ----------------------------------------------------------
+
+    db.collection("students").document(student_id).delete()
 
     return redirect(
         url_for("students")
@@ -806,158 +617,85 @@ def delete_student(student_id):
 
 # ==========================================================
 # INDIVIDUAL CHALLAN
-# IMPORTANT:
 # NEVER CREATE A DUPLICATE RECORD FOR SAME
 # STUDENT + FEE MONTH
 # ==========================================================
 
 @app.route(
-    "/students/generate/<int:student_id>",
+    "/students/generate/<student_id>",
     methods=["GET", "POST"]
 )
 @staff_required
 def generate_challan(student_id):
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    student = conn.execute("""
-        SELECT *
-        FROM students
-        WHERE id = ?
-    """, (
-        student_id,
-    )).fetchone()
+    doc = db.collection("students").document(student_id).get()
 
-    conn.close()
-
-    if student is None:
-
+    if not doc.exists:
         return "Student not found", 404
 
+    student = doc_to_dict(doc)
+
     challan_date = date.today()
-
-    due_date = challan_date + timedelta(
-        days=10
-    )
-
-    fee_month = challan_date.strftime(
-        "%B %Y"
-    )
+    due_date = challan_date + timedelta(days=10)
+    fee_month = challan_date.strftime("%B %Y")
 
     if request.method == "POST":
 
-        tuition_fee = request.form.get(
-            "tuition_fee"
-        ) or "0"
-
-        other_fee = request.form.get(
-            "other_fee"
-        ) or "0"
-
-        late_fee = request.form.get(
-            "late_fee"
-        ) or "0"
-
-        discount = request.form.get(
-            "discount"
-        ) or "0"
+        tuition_fee = request.form.get("tuition_fee") or "0"
+        other_fee   = request.form.get("other_fee")   or "0"
+        late_fee    = request.form.get("late_fee")    or "0"
+        discount    = request.form.get("discount")    or "0"
 
         try:
-
-            tuition_fee = float(
-                tuition_fee
-            )
-
-        except:
-
-            tuition_fee = float(
-                student["monthly_fee"] or 0
-            )
+            tuition_fee = float(tuition_fee)
+        except (ValueError, TypeError):
+            tuition_fee = float(student.get("monthly_fee") or 0)
 
         try:
-
-            other_fee = float(
-                other_fee
-            )
-
-        except:
-
-            other_fee = 0
+            other_fee = float(other_fee)
+        except (ValueError, TypeError):
+            other_fee = 0.0
 
         try:
-
-            late_fee = float(
-                late_fee
-            )
-
-        except:
-
-            late_fee = 0
+            late_fee = float(late_fee)
+        except (ValueError, TypeError):
+            late_fee = 0.0
 
         try:
-
-            discount = float(
-                discount
-            )
-
-        except:
-
-            discount = 0
+            discount = float(discount)
+        except (ValueError, TypeError):
+            discount = 0.0
 
         total_payable = (
-            tuition_fee
-            + other_fee
-            + late_fee
-            - discount
+            tuition_fee + other_fee + late_fee - discount
         )
 
         if total_payable < 0:
+            total_payable = 0.0
 
-            total_payable = 0
+        # ----------------------------------------------------------
+        # Check for existing record (same student + same month)
+        # ----------------------------------------------------------
 
-        conn = get_db()
+        existing_docs = (
+            db.collection("fee_payments")
+            .where("student_id", "==", student_id)
+            .where("fee_month",   "==", fee_month)
+            .limit(1)
+            .get()
+        )
 
-        # --------------------------------------------------
-        # FIXED DUPLICATE LOGIC
-        #
-        # Search for ANY record for this student/month.
-        # We do NOT use status != PAID.
-        # --------------------------------------------------
+        if existing_docs:
 
-        existing = conn.execute("""
-            SELECT *
-            FROM fee_payments
-
-            WHERE student_id = ?
-              AND fee_month = ?
-
-            ORDER BY id DESC
-
-            LIMIT 1
-        """, (
-            student_id,
-            fee_month
-        )).fetchone()
-
-        if existing:
-
-            # ----------------------------------------------
-            # If already PAID, don't create another record.
-            # Keep the payment record intact.
-            # ----------------------------------------------
+            existing = doc_to_dict(existing_docs[0])
 
             if existing["status"] == "PAID":
 
-                challan_date_display = existing["challan_date"]
-                due_date_display = existing["due_date"]
-
-                existing_tuition = existing["tuition_fee"]
-                existing_other = existing["other_fee"]
-                existing_late = existing["late_fee"]
-                existing_discount = existing["discount"]
-                existing_total = existing["total_payable"]
-
-                conn.close()
+                # --------------------------------------------------
+                # Already paid — show the existing challan only
+                # --------------------------------------------------
 
                 return render_template(
                     "generate_challan.html",
@@ -966,111 +704,72 @@ def generate_challan(student_id):
 
                     challan_date=(
                         date.fromisoformat(
-                            challan_date_display
+                            existing["challan_date"]
                         ).strftime("%d-%m-%Y")
                     ),
 
                     due_date=(
                         date.fromisoformat(
-                            due_date_display
+                            existing["due_date"]
                         ).strftime("%d-%m-%Y")
                     ),
 
                     fee_month=fee_month,
 
-                    tuition_fee=existing_tuition,
-
-                    other_fee=existing_other,
-
-                    late_fee=existing_late,
-
-                    discount=existing_discount,
-
-                    total_payable=existing_total
+                    tuition_fee=existing["tuition_fee"],
+                    other_fee=existing["other_fee"],
+                    late_fee=existing["late_fee"],
+                    discount=existing["discount"],
+                    total_payable=existing["total_payable"]
                 )
 
-            # ----------------------------------------------
-            # Existing unpaid/overdue record
-            # Update the same record.
-            # ----------------------------------------------
+            # ----------------------------------------------------------
+            # Existing unpaid/overdue — update the record
+            # ----------------------------------------------------------
 
-            conn.execute("""
-                UPDATE fee_payments
-
-                SET
-                    challan_date = ?,
-                    due_date = ?,
-                    tuition_fee = ?,
-                    other_fee = ?,
-                    late_fee = ?,
-                    discount = ?,
-                    total_payable = ?
-
-                WHERE id = ?
-            """, (
-                challan_date.isoformat(),
-                due_date.isoformat(),
-                tuition_fee,
-                other_fee,
-                late_fee,
-                discount,
-                total_payable,
-                existing["id"]
-            ))
+            existing_docs[0].reference.update({
+                "challan_date":  challan_date.isoformat(),
+                "due_date":      due_date.isoformat(),
+                "tuition_fee":   tuition_fee,
+                "other_fee":     other_fee,
+                "late_fee":      late_fee,
+                "discount":      discount,
+                "total_payable": total_payable,
+            })
 
         else:
 
-            # ----------------------------------------------
-            # No record exists, so create one.
-            # ----------------------------------------------
+            # ----------------------------------------------------------
+            # No record exists — create one
+            # ----------------------------------------------------------
 
-            conn.execute("""
-                INSERT INTO fee_payments (
-                    student_id,
-                    fee_month,
-                    challan_date,
-                    due_date,
-                    tuition_fee,
-                    other_fee,
-                    late_fee,
-                    discount,
-                    total_payable,
-                    status
-                )
-
-                VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, 'UNPAID'
-                )
-            """, (
-                student_id,
-                fee_month,
-                challan_date.isoformat(),
-                due_date.isoformat(),
-                tuition_fee,
-                other_fee,
-                late_fee,
-                discount,
-                total_payable
-            ))
-
-        conn.commit()
-
-        conn.close()
+            db.collection("fee_payments").add({
+                "student_id":    student_id,
+                "student_name":  student.get("student_name", ""),
+                "father_name":   student.get("father_name", ""),
+                "roll_no":       student.get("roll_no", ""),
+                "class_name":    student.get("class_name", ""),
+                "fee_month":     fee_month,
+                "challan_date":  challan_date.isoformat(),
+                "due_date":      due_date.isoformat(),
+                "tuition_fee":   tuition_fee,
+                "other_fee":     other_fee,
+                "late_fee":      late_fee,
+                "discount":      discount,
+                "total_payable": total_payable,
+                "status":        "UNPAID",
+                "payment_date":  None,
+                "amount_received": 0.0,
+            })
 
         return render_template(
             "generate_challan.html",
 
             student=student,
 
-            challan_date=
-                challan_date.strftime(
-                    "%d-%m-%Y"
-                ),
+            challan_date=challan_date.strftime("%d-%m-%Y"),
 
-            due_date=
-                due_date.strftime(
-                    "%d-%m-%Y"
-                ),
+            due_date=due_date.strftime("%d-%m-%Y"),
 
             fee_month=fee_month,
 
@@ -1085,26 +784,22 @@ def generate_challan(student_id):
             total_payable=total_payable
         )
 
+    # GET request — show the challan entry form
     return render_template(
         "challan_form.html",
 
         student=student,
 
-        challan_date=
-            challan_date.strftime(
-                "%d-%m-%Y"
-            ),
+        challan_date=challan_date.strftime("%d-%m-%Y"),
 
-        due_date=
-            due_date.strftime(
-                "%d-%m-%Y"
-            )
+        due_date=due_date.strftime("%d-%m-%Y"),
+
+        default_date=challan_date.isoformat()
     )
 
 
 # ==========================================================
 # GENERATE ALL CHALLANS
-# FIXED:
 # NEVER DUPLICATE SAME STUDENT + SAME MONTH
 # ==========================================================
 
@@ -1115,159 +810,81 @@ def generate_challan(student_id):
 @staff_required
 def generate_all_challans():
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    student_list = conn.execute("""
-        SELECT *
-        FROM students
-        ORDER BY
-            CAST(class_name AS INTEGER) ASC,
-            student_name ASC
-    """).fetchall()
+    docs = db.collection("students").get()
+
+    student_list = [doc_to_dict(doc) for doc in docs]
+
+    student_list.sort(
+        key=lambda s: (
+            int(s.get("class_name") or 0),
+            s.get("student_name") or ""
+        )
+    )
 
     challan_date = date.today()
-
-    due_date = challan_date + timedelta(
-        days=10
-    )
-
-    fee_month = challan_date.strftime(
-        "%B %Y"
-    )
+    due_date     = challan_date + timedelta(days=10)
+    fee_month    = challan_date.strftime("%B %Y")
 
     challans = []
 
     for student in student_list:
 
-        tuition_fee = float(
-            student["monthly_fee"] or 0
+        tuition_fee  = float(student.get("monthly_fee") or 0)
+        other_fee    = 0.0
+        late_fee     = 0.0
+        discount     = 0.0
+
+        total_payable = max(
+            tuition_fee + other_fee + late_fee - discount,
+            0.0
         )
 
-        other_fee = 0
+        # ----------------------------------------------------------
+        # Check for existing record — do NOT create duplicates
+        # ----------------------------------------------------------
 
-        late_fee = 0
-
-        discount = 0
-
-        total_payable = (
-            tuition_fee
-            + other_fee
-            + late_fee
-            - discount
+        existing_docs = (
+            db.collection("fee_payments")
+            .where("student_id", "==", student["id"])
+            .where("fee_month",   "==", fee_month)
+            .limit(1)
+            .get()
         )
 
-        if total_payable < 0:
+        if not existing_docs:
 
-            total_payable = 0
-
-        # --------------------------------------------------
-        # IMPORTANT FIX
-        #
-        # Search for ANY existing record.
-        # Previously the code searched only for records
-        # where status != PAID.
-        #
-        # Therefore a PAID record was ignored and a new
-        # duplicate was created.
-        # --------------------------------------------------
-
-        existing = conn.execute("""
-            SELECT *
-            FROM fee_payments
-
-            WHERE student_id = ?
-              AND fee_month = ?
-
-            ORDER BY id DESC
-
-            LIMIT 1
-        """, (
-            student["id"],
-            fee_month
-        )).fetchone()
-
-        if existing is None:
-
-            # ----------------------------------------------
-            # Create record only if none exists
-            # ----------------------------------------------
-
-            conn.execute("""
-                INSERT INTO fee_payments (
-                    student_id,
-                    fee_month,
-                    challan_date,
-                    due_date,
-                    tuition_fee,
-                    other_fee,
-                    late_fee,
-                    discount,
-                    total_payable,
-                    status
-                )
-
-                VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, 'UNPAID'
-                )
-            """, (
-                student["id"],
-                fee_month,
-                challan_date.isoformat(),
-                due_date.isoformat(),
-                tuition_fee,
-                other_fee,
-                late_fee,
-                discount,
-                total_payable
-            ))
-
-        else:
-
-            # ----------------------------------------------
-            # DO NOTHING if record already exists.
-            #
-            # This is especially important when PAID.
-            # We must never create another record.
-            # ----------------------------------------------
-
-            pass
+            db.collection("fee_payments").add({
+                "student_id":    student["id"],
+                "student_name":  student.get("student_name", ""),
+                "father_name":   student.get("father_name", ""),
+                "roll_no":       student.get("roll_no", ""),
+                "class_name":    student.get("class_name", ""),
+                "fee_month":     fee_month,
+                "challan_date":  challan_date.isoformat(),
+                "due_date":      due_date.isoformat(),
+                "tuition_fee":   tuition_fee,
+                "other_fee":     other_fee,
+                "late_fee":      late_fee,
+                "discount":      discount,
+                "total_payable": total_payable,
+                "status":        "UNPAID",
+                "payment_date":  None,
+                "amount_received": 0.0,
+            })
 
         challans.append({
-
-            "student": student,
-
-            "challan_date":
-                challan_date.strftime(
-                    "%d-%m-%Y"
-                ),
-
-            "due_date":
-                due_date.strftime(
-                    "%d-%m-%Y"
-                ),
-
-            "fee_month":
-                fee_month,
-
-            "tuition_fee":
-                tuition_fee,
-
-            "other_fee":
-                other_fee,
-
-            "late_fee":
-                late_fee,
-
-            "discount":
-                discount,
-
-            "total_payable":
-                total_payable
+            "student":      student,
+            "challan_date": challan_date.strftime("%d-%m-%Y"),
+            "due_date":     due_date.strftime("%d-%m-%Y"),
+            "fee_month":    fee_month,
+            "tuition_fee":  tuition_fee,
+            "other_fee":    other_fee,
+            "late_fee":     late_fee,
+            "discount":     discount,
+            "total_payable": total_payable,
         })
-
-    conn.commit()
-
-    conn.close()
 
     return render_template(
         "all_challans.html",
@@ -1279,10 +896,7 @@ def generate_all_challans():
 # FEE PAYMENTS
 #
 # CATEGORIES:
-# ALL
-# PAID
-# UNPAID
-# OVERDUE
+#   ALL | PAID | UNPAID | OVERDUE
 # ==========================================================
 
 @app.route("/fee-payments")
@@ -1290,190 +904,94 @@ def generate_all_challans():
 def fee_payments():
 
     search_id = request.args.get(
-        "student_id",
-        ""
+        "student_id", ""
     ).strip()
 
     selected_status = request.args.get(
-        "status",
-        "ALL"
+        "status", "ALL"
     ).upper().strip()
 
-    # Make sure only valid categories are accepted
-
-    valid_statuses = [
-        "ALL",
-        "PAID",
-        "UNPAID",
-        "OVERDUE"
-    ]
+    valid_statuses = ["ALL", "PAID", "UNPAID", "OVERDUE"]
 
     if selected_status not in valid_statuses:
-
         selected_status = "ALL"
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    # ------------------------------------------------------
-    # GET RECORDS
-    # ------------------------------------------------------
+    # ----------------------------------------------------------
+    # FETCH RECORDS
+    # ----------------------------------------------------------
 
     if search_id:
 
-        try:
-
-            student_id = int(
-                search_id
-            )
-
-            payments = conn.execute("""
-                SELECT
-                    fee_payments.*,
-
-                    students.student_name,
-                    students.father_name,
-                    students.roll_no,
-                    students.class_name
-
-                FROM fee_payments
-
-                JOIN students
-
-                ON students.id =
-                   fee_payments.student_id
-
-                WHERE students.id = ?
-
-                ORDER BY
-                    fee_payments.id DESC
-            """, (
-                student_id,
-            )).fetchall()
-
-        except ValueError:
-
-            payments = []
+        docs = (
+            db.collection("fee_payments")
+            .where("student_id", "==", search_id)
+            .get()
+        )
 
     else:
 
-        payments = conn.execute("""
-            SELECT
-                fee_payments.*,
+        docs = db.collection("fee_payments").get()
 
-                students.student_name,
-                students.father_name,
-                students.roll_no,
-                students.class_name
+    payments = [doc_to_dict(doc) for doc in docs]
 
-            FROM fee_payments
-
-            JOIN students
-
-            ON students.id =
-               fee_payments.student_id
-
-            ORDER BY
-                fee_payments.due_date ASC,
-                students.student_name ASC
-        """).fetchall()
-
-    conn.close()
-
-    # ------------------------------------------------------
-    # CALCULATE REAL STATUS
+    # ----------------------------------------------------------
+    # CALCULATE DISPLAY STATUS
     #
-    # A database record remains UNPAID internally.
-    # If due date has passed, we display it as OVERDUE.
-    # ------------------------------------------------------
+    # DB stores UNPAID/PAID only.
+    # If due date has passed and not paid → display as OVERDUE.
+    # ----------------------------------------------------------
 
     today = date.today()
 
-    payment_list = []
-
     for payment in payments:
 
-        payment = dict(payment)
+        if payment.get("status") == "PAID":
 
-        if payment["status"] == "PAID":
-
-            display_status = "PAID"
+            payment["display_status"] = "PAID"
 
         else:
 
             try:
-
-                due = date.fromisoformat(
-                    payment["due_date"]
+                due = date.fromisoformat(payment["due_date"])
+                payment["display_status"] = (
+                    "OVERDUE" if today > due else "UNPAID"
                 )
+            except (ValueError, TypeError, KeyError):
+                payment["display_status"] = "UNPAID"
 
-                if today > due:
+        # Overwrite status so templates use it consistently
+        payment["status"] = payment["display_status"]
 
-                    display_status = "OVERDUE"
-
-                else:
-
-                    display_status = "UNPAID"
-
-            except:
-
-                display_status = "UNPAID"
-
-        payment["display_status"] = display_status
-
-        # Keep status compatible with your existing template
-
-        payment["status"] = display_status
-
-        payment_list.append(
-            payment
-        )
-
-    # ------------------------------------------------------
+    # ----------------------------------------------------------
     # APPLY CATEGORY FILTER
-    # ------------------------------------------------------
+    # ----------------------------------------------------------
 
     if selected_status != "ALL":
-
-        payment_list = [
-            payment
-            for payment in payment_list
-            if payment["status"] == selected_status
+        payments = [
+            p for p in payments
+            if p["status"] == selected_status
         ]
 
-    # ------------------------------------------------------
-    # ORDER BY CATEGORY
-    #
-    # PAID at bottom
-    # OVERDUE before UNPAID
-    # ------------------------------------------------------
+    # ----------------------------------------------------------
+    # SORT — OVERDUE first, UNPAID next, PAID last
+    # ----------------------------------------------------------
 
-    def payment_sort(payment):
+    status_order = {"OVERDUE": 0, "UNPAID": 1, "PAID": 2}
 
-        status_order = {
-            "OVERDUE": 0,
-            "UNPAID": 1,
-            "PAID": 2
-        }
-
-        return (
-            status_order.get(
-                payment["status"],
-                3
-            ),
-
-            payment["due_date"],
-
-            payment["student_name"]
+    payments.sort(
+        key=lambda p: (
+            status_order.get(p["status"], 3),
+            p.get("due_date", ""),
+            p.get("student_name", "")
         )
-
-    payment_list.sort(
-        key=payment_sort
     )
 
     return render_template(
         "fee_payments.html",
 
-        payments=payment_list,
+        payments=payments,
 
         search_id=search_id,
 
@@ -1486,64 +1004,34 @@ def fee_payments():
 # ==========================================================
 
 @app.route(
-    "/fee-payments/mark-paid/<int:payment_id>",
+    "/fee-payments/mark-paid/<payment_id>",
     methods=["POST"]
 )
 @staff_required
 def mark_paid(payment_id):
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    payment = conn.execute("""
-        SELECT *
-        FROM fee_payments
-        WHERE id = ?
-    """, (
-        payment_id,
-    )).fetchone()
+    ref = db.collection("fee_payments").document(payment_id)
+    doc = ref.get()
 
-    if payment is None:
-
-        conn.close()
-
+    if not doc.exists:
         return "Payment record not found", 404
 
-    # ------------------------------------------------------
-    # PREVENT DOUBLE PAYMENT
-    # ------------------------------------------------------
+    payment = doc.to_dict()
 
-    if payment["status"] == "PAID":
+    # ----------------------------------------------------------
+    # Prevent double payment
+    # ----------------------------------------------------------
 
-        conn.close()
+    if payment.get("status") == "PAID":
+        return redirect(url_for("fee_payments"))
 
-        return redirect(
-            url_for("fee_payments")
-        )
-
-    payment_date = date.today().isoformat()
-
-    amount_received = float(
-        payment["total_payable"] or 0
-    )
-
-    conn.execute("""
-        UPDATE fee_payments
-
-        SET
-            status = 'PAID',
-            payment_date = ?,
-            amount_received = ?
-
-        WHERE id = ?
-    """, (
-        payment_date,
-        amount_received,
-        payment_id
-    ))
-
-    conn.commit()
-
-    conn.close()
+    ref.update({
+        "status":          "PAID",
+        "payment_date":    date.today().isoformat(),
+        "amount_received": float(payment.get("total_payable") or 0),
+    })
 
     return redirect(
         url_for("fee_payments")
@@ -1555,44 +1043,25 @@ def mark_paid(payment_id):
 # ==========================================================
 
 @app.route(
-    "/fee-payments/mark-unpaid/<int:payment_id>",
+    "/fee-payments/mark-unpaid/<payment_id>",
     methods=["POST"]
 )
 @staff_required
 def mark_unpaid(payment_id):
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    payment = conn.execute("""
-        SELECT *
-        FROM fee_payments
-        WHERE id = ?
-    """, (
-        payment_id,
-    )).fetchone()
+    ref = db.collection("fee_payments").document(payment_id)
+    doc = ref.get()
 
-    if payment is None:
-
-        conn.close()
-
+    if not doc.exists:
         return "Payment record not found", 404
 
-    conn.execute("""
-        UPDATE fee_payments
-
-        SET
-            status = 'UNPAID',
-            payment_date = NULL,
-            amount_received = 0
-
-        WHERE id = ?
-    """, (
-        payment_id,
-    ))
-
-    conn.commit()
-
-    conn.close()
+    ref.update({
+        "status":          "UNPAID",
+        "payment_date":    None,
+        "amount_received": 0.0,
+    })
 
     return redirect(
         url_for("fee_payments")
@@ -1604,38 +1073,21 @@ def mark_unpaid(payment_id):
 # ==========================================================
 
 @app.route(
-    "/fee-payments/delete/<int:payment_id>",
+    "/fee-payments/delete/<payment_id>",
     methods=["POST"]
 )
 @staff_required
 def delete_fee_payment(payment_id):
 
-    conn = get_db()
+    db = get_firestore_db()
 
-    payment = conn.execute("""
-        SELECT *
-        FROM fee_payments
-        WHERE id = ?
-    """, (
-        payment_id,
-    )).fetchone()
+    ref = db.collection("fee_payments").document(payment_id)
+    doc = ref.get()
 
-    if payment is None:
-
-        conn.close()
-
+    if not doc.exists:
         return "Fee record not found", 404
 
-    conn.execute("""
-        DELETE FROM fee_payments
-        WHERE id = ?
-    """, (
-        payment_id,
-    ))
-
-    conn.commit()
-
-    conn.close()
+    ref.delete()
 
     return redirect(
         url_for("fee_payments")
@@ -1647,8 +1099,6 @@ def delete_fee_payment(payment_id):
 # ==========================================================
 
 if __name__ == "__main__":
-
-    init_db()
 
     app.run(
         debug=True

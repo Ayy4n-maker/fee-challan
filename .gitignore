@@ -2,3 +2,4 @@ fee_system.db
 __pycache__/
 *.pyc
 .env
+serviceAccountKey*.json

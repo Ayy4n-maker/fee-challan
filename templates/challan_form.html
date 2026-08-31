@@ -226,7 +226,7 @@
 
         <input
             type="text"
-            value="{{ '%03d'|format(student.id) }}"
+            value="{{ student.id[:8] }}"
             readonly
         >
 
@@ -271,9 +271,10 @@
         <label>Due Date</label>
 
         <input
-            type="date"
-            id="due_date"
+            type="text"
+            id="due_date_display"
             class="due-date-box"
+            value="{{ due_date }}"
             readonly
         >
 
@@ -388,7 +389,7 @@ Academic Session 2026–2027
 function calculateDueDate() {
 
     const feeDateInput = document.getElementById("fee_date");
-    const dueDateInput = document.getElementById("due_date");
+    const dueDateInput = document.getElementById("due_date_display");
 
     if (!feeDateInput.value) {
         dueDateInput.value = "";
@@ -399,19 +400,17 @@ function calculateDueDate() {
 
     feeDate.setDate(feeDate.getDate() + 10);
 
-    const year = feeDate.getFullYear();
+    const year  = feeDate.getFullYear();
     const month = String(feeDate.getMonth() + 1).padStart(2, "0");
-    const day = String(feeDate.getDate()).padStart(2, "0");
+    const day   = String(feeDate.getDate()).padStart(2, "0");
 
-    dueDateInput.value = `${year}-${month}-${day}`;
+    dueDateInput.value = `${day}-${month}-${year}`;
 }
 
 document.getElementById("fee_date").addEventListener(
     "change",
     calculateDueDate
 );
-
-calculateDueDate();
 
 </script>
 

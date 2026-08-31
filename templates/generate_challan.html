@@ -312,7 +312,7 @@
 
                 <div class="info-box">
                     <span class="info-label">Student ID:</span>
-                    {{ '%03d'|format(student.id) }}
+                    {{ student.id[:8] }}
                 </div>
 
                 <div class="info-box">
@@ -380,7 +380,7 @@
 
                 <div class="date-box">
                     <strong>Due Date:</strong>
-                    __________________
+                    {{ due_date }}
                 </div>
 
             </div>
@@ -448,7 +448,7 @@
 
                 <div class="info-box">
                     <span class="info-label">Student ID:</span>
-                    {{ '%03d'|format(student.id) }}
+                    {{ student.id[:8] }}
                 </div>
 
                 <div class="info-box">
@@ -516,7 +516,7 @@
 
                 <div class="date-box">
                     <strong>Due Date:</strong>
-                    __________________
+                    {{ due_date }}
                 </div>
 
             </div>

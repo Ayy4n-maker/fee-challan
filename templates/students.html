@@ -206,7 +206,7 @@ alt="IESC Logo"
 
 <div class="top-buttons">
 
-<a href="/" class="button home">
+<a href="{{ url_for('staff') }}" class="button home">
     Home
 </a>
 
@@ -240,7 +240,7 @@ alt="IESC Logo"
 <tr>
 
 <td>
-    {{ "%03d"|format(student.id) }}
+    {{ student.id[:8] }}
 </td>
 
 <td>
