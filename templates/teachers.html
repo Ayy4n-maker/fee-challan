@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teachers Information | IESC</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
+            min-height: 100vh;
+            padding: 35px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 150px;
+            height: 95px;
+            object-fit: contain;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .top-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .button {
+            padding: 12px 18px;
+            border-radius: 9px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .home {
+            background: #e0e7ff;
+            color: #172554;
+        }
+
+        .add {
+            background: #172554;
+            color: white;
+        }
+
+        .print-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .print-btn:hover {
+            background: #15803d;
+        }
+
+        .teacher-count {
+            padding: 12px 18px;
+            border-radius: 9px;
+            background: #e0e7ff;
+            color: #172554;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .table-box {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th {
+            background: #172554;
+            color: white;
+            padding: 14px;
+            text-align: left;
+        }
+
+        td {
+            padding: 13px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .actions {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .update {
+            background: #2563eb;
+            color: white;
+        }
+
+        .delete-button {
+            padding: 10px 14px;
+            border-radius: 7px;
+            border: none;
+            color: white;
+            background: #dc2626;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .update:hover {
+            background: #1d4ed8;
+        }
+
+        .delete-button:hover {
+            background: #b91c1c;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+            }
+
+            .top-buttons, .actions, th:last-child, td:last-child {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            .container {
+                padding: 25px 18px;
+            }
+
+            .top {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .top-buttons {
+                flex-direction: column;
+            }
+
+            .top-buttons .button, .teacher-count {
+                text-align: center;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="IESC Logo">
+            <h1>Teachers Information</h1>
+            <div class="subtitle">Irshad Educational Academy — Faculty Roster</div>
+        </div>
+
+        <div class="top">
+            <div class="top-buttons">
+                <a href="{% if session.get('admin_logged_in') %}/admin{% else %}/staff{% endif %}" class="button home">
+                    Dashboard
+                </a>
+
+                <a href="/teachers/add" class="button add">
+                    Add Teacher
+                </a>
+
+                <button onclick="window.print()" class="button print-btn">
+                    Print Faculty Roster
+                </button>
+
+                <div class="teacher-count">
+                    Total Teachers: {{ teachers|length }}
+                </div>
+            </div>
+        </div>
+
+        <div class="table-box">
+            {% if teachers %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Teacher Name</th>
+                        <th>Contact Number</th>
+                        <th>Allotted Class</th>
+                        <th>Allotted Subjects</th>
+                        <th>Monthly Salary</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for teacher in teachers %}
+                    <tr>
+                        <td>{{ teacher.display_id }}</td>
+                        <td><strong>{{ teacher.teacher_name }}</strong></td>
+                        <td>{{ teacher.phone }}</td>
+                        <td>Class {{ teacher.allotted_class }}</td>
+                        <td>{{ teacher.allotted_subjects }}</td>
+                        <td>Rs. {{ "%.2f"|format(teacher.salary or 0) }}</td>
+                        <td>
+                            <div class="actions">
+                                <a href="/teachers/update/{{ teacher.id }}" class="button update">Update</a>
+
+                                <form action="/teachers/delete/{{ teacher.id }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="delete-button" onclick="return confirm('Delete this teacher record?')">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-records">
+                <h3>No Teachers Added Yet</h3>
+                <p>Click "Add Teacher" above to register faculty members.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -229,6 +229,18 @@ def admin():
 
             total_unpaid += 1
 
+    # ----------------------------------------------------------
+    # EXPENSES & PROFIT/LOSS STATS
+    # ----------------------------------------------------------
+    expenses_docs = db.collection("expenses").get()
+    recorded_expenses = sum(float(doc.to_dict().get("amount") or 0) for doc in expenses_docs)
+
+    teachers_docs = db.collection("teachers").get()
+    total_teacher_salaries = sum(float(doc.to_dict().get("salary") or 0) for doc in teachers_docs)
+
+    total_expenses = recorded_expenses + total_teacher_salaries
+    net_profit_loss = total_received - total_expenses
+
     return render_template(
         "admin.html",
 
@@ -246,7 +258,11 @@ def admin():
 
         total_stationery_fee=total_stationery_fee,
 
-        total_discount=total_discount
+        total_discount=total_discount,
+
+        total_expenses=total_expenses,
+
+        net_profit_loss=net_profit_loss
     )
 
 
@@ -1204,6 +1220,168 @@ def delete_fee_payment(payment_id):
     return redirect(
         url_for("fee_payments")
     )
+
+
+# ==========================================================
+# TEACHERS MANAGEMENT
+# ==========================================================
+
+@app.route("/teachers")
+@login_required
+def teachers():
+    db = get_firestore_db()
+    docs = db.collection("teachers").get()
+    teacher_list = [doc_to_dict(doc, default_index=idx) for idx, doc in enumerate(docs, start=1)]
+    teacher_list.sort(key=lambda t: int(t.get("serial_id") or 0))
+    return render_template("teachers.html", teachers=teacher_list)
+
+
+@app.route("/teachers/add", methods=["GET", "POST"])
+@login_required
+def add_teacher():
+    if request.method == "POST":
+        teacher_name = request.form.get("teacher_name", "")
+        phone = request.form.get("phone", "")
+        allotted_class = request.form.get("allotted_class", "")
+        allotted_subjects = request.form.get("allotted_subjects", "")
+        salary = request.form.get("salary") or "0"
+
+        try:
+            salary = float(salary)
+        except (ValueError, TypeError):
+            salary = 0.0
+
+        db = get_firestore_db()
+        docs = db.collection("teachers").get()
+        serials = []
+        for d in docs:
+            d_dict = d.to_dict() or {}
+            if d_dict.get("serial_id"):
+                try:
+                    serials.append(int(d_dict["serial_id"]))
+                except (ValueError, TypeError):
+                    pass
+
+        next_serial = max(serials, default=len(docs)) + 1
+
+        db.collection("teachers").add({
+            "serial_id": next_serial,
+            "teacher_name": teacher_name,
+            "phone": phone,
+            "allotted_class": allotted_class,
+            "allotted_subjects": allotted_subjects,
+            "salary": salary,
+        })
+        return redirect(url_for("teachers"))
+
+    return render_template("add_teacher.html")
+
+
+@app.route("/teachers/update/<teacher_id>", methods=["GET", "POST"])
+@login_required
+def update_teacher(teacher_id):
+    db = get_firestore_db()
+    ref = db.collection("teachers").document(teacher_id)
+    doc = ref.get()
+    if not doc.exists:
+        return "Teacher not found", 404
+
+    teacher = doc_to_dict(doc)
+
+    if request.method == "POST":
+        teacher_name = request.form.get("teacher_name", "")
+        phone = request.form.get("phone", "")
+        allotted_class = request.form.get("allotted_class", "")
+        allotted_subjects = request.form.get("allotted_subjects", "")
+        salary = request.form.get("salary") or "0"
+
+        try:
+            salary = float(salary)
+        except (ValueError, TypeError):
+            salary = 0.0
+
+        ref.update({
+            "teacher_name": teacher_name,
+            "phone": phone,
+            "allotted_class": allotted_class,
+            "allotted_subjects": allotted_subjects,
+            "salary": salary,
+        })
+        return redirect(url_for("teachers"))
+
+    return render_template("update_teacher.html", teacher=teacher)
+
+
+@app.route("/teachers/delete/<teacher_id>", methods=["POST"])
+@login_required
+def delete_teacher(teacher_id):
+    db = get_firestore_db()
+    db.collection("teachers").document(teacher_id).delete()
+    return redirect(url_for("teachers"))
+
+
+# ==========================================================
+# EXPENSES MANAGEMENT
+# ==========================================================
+
+@app.route("/expenses")
+@login_required
+def expenses():
+    db = get_firestore_db()
+    docs = db.collection("expenses").get()
+    expense_list = [doc_to_dict(doc, default_index=idx) for idx, doc in enumerate(docs, start=1)]
+    expense_list.sort(key=lambda e: e.get("expense_date", ""), reverse=True)
+
+    total_expenses_sum = sum(float(e.get("amount") or 0) for e in expense_list)
+
+    return render_template("expenses.html", expenses=expense_list, total_expenses_sum=total_expenses_sum)
+
+
+@app.route("/expenses/add", methods=["GET", "POST"])
+@login_required
+def add_expense():
+    if request.method == "POST":
+        category = request.form.get("category", "")
+        description = request.form.get("description", "")
+        amount = request.form.get("amount") or "0"
+        expense_date = request.form.get("expense_date") or date.today().isoformat()
+
+        try:
+            amount = float(amount)
+        except (ValueError, TypeError):
+            amount = 0.0
+
+        db = get_firestore_db()
+        docs = db.collection("expenses").get()
+        serials = []
+        for d in docs:
+            d_dict = d.to_dict() or {}
+            if d_dict.get("serial_id"):
+                try:
+                    serials.append(int(d_dict["serial_id"]))
+                except (ValueError, TypeError):
+                    pass
+
+        next_serial = max(serials, default=len(docs)) + 1
+
+        db.collection("expenses").add({
+            "serial_id": next_serial,
+            "category": category,
+            "description": description,
+            "amount": amount,
+            "expense_date": expense_date,
+        })
+        return redirect(url_for("expenses"))
+
+    return render_template("add_expense.html", default_date=date.today().isoformat())
+
+
+@app.route("/expenses/delete/<expense_id>", methods=["POST"])
+@login_required
+def delete_expense(expense_id):
+    db = get_firestore_db()
+    db.collection("expenses").document(expense_id).delete()
+    return redirect(url_for("expenses"))
 
 
 # ==========================================================

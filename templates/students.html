@@ -177,6 +177,30 @@ tr:hover {
         flex-direction: column;
     }
 
+.print-button {
+    background: #16a34a;
+    color: white;
+}
+
+.print-button:hover {
+    background: #15803d;
+}
+
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .container {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+    }
+
+    .top-buttons, .actions, th:last-child, td:last-child {
+        display: none !important;
+    }
 }
 
 </style>
@@ -197,7 +221,7 @@ alt="IESC Logo"
 >
 
 <div class="subtitle">
-    Fee Management System
+    Fee Management System — Student Roster
 </div>
 
 </div>
@@ -213,6 +237,10 @@ alt="IESC Logo"
 <a href="/students/add" class="button add">
     Add Student
 </a>
+
+<button onclick="window.print()" class="button print-button">
+    Print Roster
+</button>
 
 <div class="student-count">
     Total Students: {{ students|length }}

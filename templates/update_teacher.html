@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Teacher | IESC</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 35px 45px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 150px;
+            height: 95px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 5px auto;
+        }
+
+        h1 {
+            margin: 0;
+            color: #172554;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-top: 7px;
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 22px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 7px;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            outline: none;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 35px;
+        }
+
+        .btn {
+            border: none;
+            padding: 13px 28px;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.25s;
+        }
+
+        .btn-save {
+            background: #172554;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #2563eb;
+        }
+
+        .btn-cancel {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        .btn-cancel:hover {
+            background: #d1d5db;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        @media (max-width: 650px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="IESC Logo" class="logo">
+            <h1>Update Teacher Information</h1>
+            <div class="subtitle">Teacher ID: {{ teacher.display_id }}</div>
+        </div>
+
+        <form method="POST">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Teacher Full Name <span class="required">*</span></label>
+                    <input type="text" name="teacher_name" value="{{ teacher.teacher_name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Contact Number <span class="required">*</span></label>
+                    <input type="tel" name="phone" value="{{ teacher.phone }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Allotted Class <span class="required">*</span></label>
+                    <select name="allotted_class" required>
+                        <option value="">Select Class</option>
+                        {% for c in ["6", "7", "8", "9", "10", "11", "12", "Multiple"] %}
+                        <option value="{{ c }}" {% if teacher.allotted_class == c %}selected{% endif %}>Class {{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Monthly Salary (Rupees) <span class="required">*</span></label>
+                    <input type="number" name="salary" value="{{ teacher.salary }}" min="0" step="1" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Allotted Subjects <span class="required">*</span></label>
+                    <input type="text" name="allotted_subjects" value="{{ teacher.allotted_subjects }}" required>
+                </div>
+
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="btn btn-save">Save Changes</button>
+                <a href="/teachers" class="btn btn-cancel">Cancel</a>
+            </div>
+
+        </form>
+
+        <div class="footer">
+            Irshad Educational Academy
+        </div>
+
+    </div>
+
+</body>
+</html>
