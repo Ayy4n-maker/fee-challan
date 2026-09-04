@@ -215,6 +215,12 @@
             IESC Fee Management System
         </div>
 
+        <div style="margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; background: #e0f2fe; color: #0369a1; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid #bae6fd;">
+            <span>👤 Admin: <strong>{{ current_username }}</strong></span>
+            <span>•</span>
+            <span>🏫 {{ current_school_name }}</span>
+        </div>
+
     </div>
 
 
@@ -365,6 +371,40 @@
     </div>
 
 
+    <!-- =====================================================
+         LINKED STAFF CREDENTIALS FOR THIS PORTFOLIO
+    ===================================================== -->
+    <div class="actions" style="margin-top: 25px; background: #f8fafc; border: 2px solid #cbd5e1; text-align: left; padding: 22px;">
+
+        <h3 style="color: #172554; margin-top: 0; font-size: 17px; display: flex; align-items: center; gap: 8px;">
+            🔑 Staff Access Login for this School Portfolio
+        </h3>
+
+        <p style="font-size: 13px; color: #64748b; margin-top: -5px; margin-bottom: 15px;">
+            Your school staff members can log in using these credentials to manage students and print challans for this portfolio.
+        </p>
+
+        <form action="/admin/update-staff" method="POST" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 170px;">
+                <label style="display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 5px;">Staff Username:</label>
+                <input type="text" name="staff_username" value="{{ staff_username }}" required style="width: 100%; padding: 9px 12px; border-radius: 7px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+            </div>
+
+            <div style="flex: 1; min-width: 170px;">
+                <label style="display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 5px;">Staff Password:</label>
+                <input type="text" name="staff_password" value="{{ staff_password }}" required style="width: 100%; padding: 9px 12px; border-radius: 7px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+            </div>
+
+            <div>
+                <button type="submit" style="background: #2563eb; color: white; padding: 10px 18px; border: none; border-radius: 7px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s;">
+                    Save Staff Login
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+
     <div class="actions">
 
         <h2>Admin Management Options</h2>
@@ -409,6 +449,10 @@
 
             <a href="/staff" class="button" style="background:#4b5563;">
                 Staff Portal
+            </a>
+
+            <a href="/register" class="button" style="background:#059669;">
+                + Create New Portfolio
             </a>
 
             <a href="/" class="button back">

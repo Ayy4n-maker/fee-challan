@@ -46,10 +46,12 @@ def get_firestore_db():
                 # -------------------------------------------------------
                 # Fall back to local file (development)
                 # -------------------------------------------------------
-                key_path = os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)),
-                    "serviceAccountKey.json"
-                )
+                base_dir = os.path.dirname(os.path.abspath(__file__))
+                key_path = os.path.join(base_dir, "serviceAccountKey.json")
+                if not os.path.exists(key_path):
+                    alt_path = os.path.join(base_dir, "serviceAccountKey.json.json")
+                    if os.path.exists(alt_path):
+                        key_path = alt_path
 
                 cred = credentials.Certificate(key_path)
 
