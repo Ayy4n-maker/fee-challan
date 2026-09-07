@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -66,6 +67,7 @@ h1 {
     align-items: center;
     gap: 15px;
     margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
 .search-form {
@@ -96,9 +98,37 @@ h1 {
     color: white;
 }
 
+.search:hover {
+    background: #2563eb;
+}
+
 .back {
     background: #e0e7ff;
     color: #172554;
+}
+
+.back:hover {
+    background: #c7d2fe;
+}
+
+
+/* =====================================================
+   DELETE ALL
+===================================================== */
+
+.delete-all-button {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 7px;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.delete-all-button:hover {
+    background: #b91c1c;
 }
 
 
@@ -296,6 +326,10 @@ tr:hover {
         text-align: center;
     }
 
+    .delete-all-button {
+        width: 100%;
+    }
+
     .categories {
         justify-content: center;
     }
@@ -306,475 +340,514 @@ tr:hover {
 
 </head>
 
-
 <body>
-
 
 <div class="container">
 
+```
+<!-- =================================================
+     HEADER
+================================================== -->
 
-    <!-- =================================================
-         HEADER
-    ================================================== -->
+<div class="header">
 
-    <div class="header">
+    <img
+        src="{{ url_for('static', filename='logo.png') }}"
+        class="logo"
+        alt="IESC Logo"
+    >
 
-        <img
-            src="{{ url_for('static', filename='logo.png') }}"
-            class="logo"
-            alt="IESC Logo"
-        >
+    <h1>
+        Fee Payments
+    </h1>
 
-        <h1>
-            Fee Payments
-        </h1>
-
-        <div class="subtitle">
-            IESC Fee Management System
-        </div>
-
+    <div class="subtitle">
+        IESC Fee Management System
     </div>
 
-
-    <!-- =================================================
-         SEARCH + BACK
-    ================================================== -->
-
-    <div class="top-bar">
+</div>
 
 
-        <form
-            method="GET"
-            action="{{ url_for('fee_payments') }}"
-            class="search-form"
+<!-- =================================================
+     SEARCH + DELETE ALL + BACK
+================================================== -->
+
+<div class="top-bar">
+
+
+    <!-- SEARCH -->
+
+    <form
+        method="GET"
+        action="{{ url_for('fee_payments') }}"
+        class="search-form"
+    >
+
+        <input
+            type="text"
+            name="student_id"
+            placeholder="Search Student ID"
+            value="{{ search_id }}"
         >
 
-            <input
-                type="text"
-                name="student_id"
-                placeholder="Search Student ID"
-                value="{{ search_id }}"
-            >
-
-            <input
-                type="hidden"
-                name="status"
-                value="{{ selected_status }}"
-            >
-
-            <button
-                type="submit"
-                class="button search"
-            >
-                Search
-            </button>
-
-        </form>
-
-
-        <a
-            href="{% if session.get('admin_logged_in') %}/admin{% else %}/staff{% endif %}"
-            class="button back"
+        <input
+            type="hidden"
+            name="status"
+            value="{{ selected_status }}"
         >
-            Back to Dashboard
-        </a>
 
-
-    </div>
-
-
-    <!-- =================================================
-         FEE CATEGORIES
-    ================================================== -->
-
-    <div class="categories">
-
-
-        <a
-            href="{{ url_for('fee_payments', status='ALL', student_id=search_id) }}"
-            class="category {% if selected_status == 'ALL' %}active{% endif %}"
+        <button
+            type="submit"
+            class="button search"
         >
-            All Records
-        </a>
+            Search
+        </button>
+
+    </form>
 
 
-        <a
-            href="{{ url_for('fee_payments', status='PAID', student_id=search_id) }}"
-            class="category {% if selected_status == 'PAID' %}active{% endif %}"
+    <!-- DELETE ALL FEE RECORDS -->
+
+    <form
+        method="POST"
+        action="{{ url_for('delete_all_fee_payments') }}"
+        onsubmit="return confirmDeleteAll();"
+    >
+
+        <button
+            type="submit"
+            class="delete-all-button"
         >
-            Paid
-        </a>
+            Delete All Fee Records
+        </button>
 
+    </form>
 
-        <a
-            href="{{ url_for('fee_payments', status='UNPAID', student_id=search_id) }}"
-            class="category {% if selected_status == 'UNPAID' %}active{% endif %}"
-        >
-            Unpaid
-        </a>
 
+    <!-- BACK -->
 
-        <a
-            href="{{ url_for('fee_payments', status='OVERDUE', student_id=search_id) }}"
-            class="category {% if selected_status == 'OVERDUE' %}active{% endif %}"
-        >
-            Overdue
-        </a>
+    <a
+        href="{% if session.get('admin_logged_in') %}/admin{% else %}/staff{% endif %}"
+        class="button back"
+    >
+        Back to Dashboard
+    </a>
 
 
-    </div>
+</div>
 
 
-    <!-- =================================================
-         TABLE
-    ================================================== -->
+<!-- =================================================
+     FEE CATEGORIES
+================================================== -->
 
-    <div class="table-box">
+<div class="categories">
 
 
-        {% if payments %}
+    <a
+        href="{{ url_for('fee_payments', status='ALL', student_id=search_id) }}"
+        class="category {% if selected_status == 'ALL' %}active{% endif %}"
+    >
+        All Records
+    </a>
 
 
-        <table>
+    <a
+        href="{{ url_for('fee_payments', status='PAID', student_id=search_id) }}"
+        class="category {% if selected_status == 'PAID' %}active{% endif %}"
+    >
+        Paid
+    </a>
 
 
-            <thead>
+    <a
+        href="{{ url_for('fee_payments', status='UNPAID', student_id=search_id) }}"
+        class="category {% if selected_status == 'UNPAID' %}active{% endif %}"
+    >
+        Unpaid
+    </a>
 
-                <tr>
 
-                    <th>ID</th>
+    <a
+        href="{{ url_for('fee_payments', status='OVERDUE', student_id=search_id) }}"
+        class="category {% if selected_status == 'OVERDUE' %}active{% endif %}"
+    >
+        Overdue
+    </a>
 
-                    <th>Student</th>
 
-                    <th>Father Name</th>
+</div>
 
-                    <th>Class</th>
 
-                    <th>Fee Month</th>
+<!-- =================================================
+     TABLE
+================================================== -->
 
-                    <th>Tuition</th>
+<div class="table-box">
 
-                    <th>Late Fee</th>
 
-                    <th>Other Fee</th>
+    {% if payments %}
 
-                    <th>Discount</th>
 
-                    <th>Total</th>
+    <table>
 
-                    <th>Due Date</th>
 
-                    <th>Status</th>
+        <thead>
 
-                    <th>Action</th>
+            <tr>
 
-                </tr>
+                <th>ID</th>
 
-            </thead>
+                <th>Student</th>
 
+                <th>Father Name</th>
 
-            <tbody>
+                <th>Class</th>
 
+                <th>Fee Month</th>
 
-            {% for payment in payments %}
+                <th>Tuition</th>
 
+                <th>Late Fee</th>
 
-                <tr>
+                <th>Other Fee</th>
 
+                <th>Discount</th>
 
-                    <!-- STUDENT ID -->
+                <th>Total</th>
 
-                    <td>
+                <th>Due Date</th>
 
-                        {{ payment.student_display_id or payment.student_id[:8] }}
+                <th>Status</th>
 
-                    </td>
+                <th>Action</th>
 
+            </tr>
 
-                    <!-- STUDENT -->
+        </thead>
 
-                    <td>
 
-                        {{ payment.student_name }}
+        <tbody>
 
-                    </td>
 
+        {% for payment in payments %}
 
-                    <!-- FATHER -->
 
-                    <td>
+            <tr>
 
-                        {{ payment.father_name }}
 
-                    </td>
+                <!-- STUDENT ID -->
 
+                <td>
 
-                    <!-- CLASS -->
+                    {{ payment.student_display_id or payment.student_id[:8] }}
 
-                    <td>
+                </td>
 
-                        {{ payment.class_name }}
 
-                    </td>
+                <!-- STUDENT -->
 
+                <td>
 
-                    <!-- MONTH -->
+                    {{ payment.student_name }}
 
-                    <td>
+                </td>
 
-                        {{ payment.fee_month }}
 
-                    </td>
+                <!-- FATHER -->
 
+                <td>
 
-                    <!-- TUITION -->
+                    {{ payment.father_name }}
 
-                    <td class="amount">
+                </td>
+
+
+                <!-- CLASS -->
+
+                <td>
+
+                    {{ payment.class_name }}
+
+                </td>
+
+
+                <!-- MONTH -->
+
+                <td>
+
+                    {{ payment.fee_month }}
+
+                </td>
+
+
+                <!-- TUITION -->
+
+                <td class="amount">
+
+                    Rs.
+                    {{ "%.2f"|format(payment.tuition_fee or 0) }}
+
+                </td>
+
+
+                <!-- LATE FEE -->
+
+                <td class="amount">
+
+                    Rs.
+                    {{ "%.2f"|format(payment.late_fee or 0) }}
+
+                </td>
+
+
+                <!-- OTHER -->
+
+                <td class="amount">
+
+                    Rs.
+                    {{ "%.2f"|format(payment.other_fee or 0) }}
+
+                </td>
+
+
+                <!-- DISCOUNT -->
+
+                <td class="amount">
+
+                    Rs.
+                    {{ "%.2f"|format(payment.discount or 0) }}
+
+                </td>
+
+
+                <!-- TOTAL -->
+
+                <td class="amount">
+
+                    <strong>
 
                         Rs.
-                        {{ "%.2f"|format(payment.tuition_fee or 0) }}
+                        {{ "%.2f"|format(payment.total_payable or 0) }}
 
-                    </td>
+                    </strong>
 
-
-                    <!-- LATE FEE -->
-
-                    <td class="amount">
-
-                        Rs.
-                        {{ "%.2f"|format(payment.late_fee or 0) }}
-
-                    </td>
+                </td>
 
 
-                    <!-- OTHER -->
+                <!-- DUE DATE -->
 
-                    <td class="amount">
+                <td>
 
-                        Rs.
-                        {{ "%.2f"|format(payment.other_fee or 0) }}
+                    {{ payment.due_date }}
 
-                    </td>
-
-
-                    <!-- DISCOUNT -->
-
-                    <td class="amount">
-
-                        Rs.
-                        {{ "%.2f"|format(payment.discount or 0) }}
-
-                    </td>
+                </td>
 
 
-                    <!-- TOTAL -->
+                <!-- STATUS -->
 
-                    <td class="amount">
-
-                        <strong>
-
-                            Rs.
-                            {{ "%.2f"|format(payment.total_payable or 0) }}
-
-                        </strong>
-
-                    </td>
+                <td>
 
 
-                    <!-- DUE DATE -->
-
-                    <td>
-
-                        {{ payment.due_date }}
-
-                    </td>
+                    {% if payment.status == "PAID" %}
 
 
-                    <!-- STATUS -->
+                        <span class="status paid">
 
-                    <td>
+                            PAID
+
+                        </span>
+
+
+                    {% elif payment.status == "OVERDUE" %}
+
+
+                        <span class="status overdue">
+
+                            OVERDUE
+
+                        </span>
+
+
+                    {% else %}
+
+
+                        <span class="status unpaid">
+
+                            UNPAID
+
+                        </span>
+
+
+                    {% endif %}
+
+
+                </td>
+
+
+                <!-- ACTION -->
+
+                <td>
+
+
+                    <div class="action-box">
 
 
                         {% if payment.status == "PAID" %}
 
 
-                            <span class="status paid">
-
-                                PAID
-
-                            </span>
-
-
-                        {% elif payment.status == "OVERDUE" %}
-
-
-                            <span class="status overdue">
-
-                                OVERDUE
-
-                            </span>
-
-
-                        {% else %}
-
-
-                            <span class="status unpaid">
-
-                                UNPAID
-
-                            </span>
-
-
-                        {% endif %}
-
-
-                    </td>
-
-
-                    <!-- ACTION -->
-
-                    <td>
-
-
-                        <div class="action-box">
-
-
-                            {% if payment.status == "PAID" %}
-
-
-                                <!-- REVERSE PAYMENT -->
-
-                                <form
-                                    method="POST"
-                                    action="{{ url_for('mark_unpaid', payment_id=payment.id) }}"
-                                    onsubmit="return confirm('Are you sure you want to reverse this payment and mark it as UNPAID?');"
-                                >
-
-                                    <button
-                                        type="submit"
-                                        class="reverse-button"
-                                    >
-
-                                        Reverse
-
-                                    </button>
-
-                                </form>
-
-
-                            {% else %}
-
-
-                                <!-- MARK PAID -->
-
-                                <form
-                                    method="POST"
-                                    action="{{ url_for('mark_paid', payment_id=payment.id) }}"
-                                    onsubmit="return confirm('Mark this fee as PAID?');"
-                                >
-
-                                    <button
-                                        type="submit"
-                                        class="pay-button"
-                                    >
-
-                                        Mark as Paid
-
-                                    </button>
-
-                                </form>
-
-
-                            {% endif %}
-
-
-                            <!-- DELETE -->
+                            <!-- REVERSE PAYMENT -->
 
                             <form
                                 method="POST"
-                                action="{{ url_for('delete_fee_payment', payment_id=payment.id) }}"
-                                onsubmit="return confirm('WARNING: This will permanently delete this fee record. Continue?');"
+                                action="{{ url_for('mark_unpaid', payment_id=payment.id) }}"
+                                onsubmit="return confirm('Are you sure you want to reverse this payment and mark it as UNPAID?');"
                             >
 
                                 <button
                                     type="submit"
-                                    class="delete-button"
+                                    class="reverse-button"
                                 >
 
-                                    Delete
+                                    Reverse
 
                                 </button>
 
                             </form>
 
 
-                        </div>
+                        {% else %}
 
 
-                    </td>
+                            <!-- MARK PAID -->
+
+                            <form
+                                method="POST"
+                                action="{{ url_for('mark_paid', payment_id=payment.id) }}"
+                                onsubmit="return confirm('Mark this fee as PAID?');"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="pay-button"
+                                >
+
+                                    Mark as Paid
+
+                                </button>
+
+                            </form>
 
 
-                </tr>
+                        {% endif %}
 
 
-            {% endfor %}
+                        <!-- DELETE -->
+
+                        <form
+                            method="POST"
+                            action="{{ url_for('delete_fee_payment', payment_id=payment.id) }}"
+                            onsubmit="return confirm('WARNING: This will permanently delete this fee record. Continue?');"
+                        >
+
+                            <button
+                                type="submit"
+                                class="delete-button"
+                            >
+
+                                Delete
+
+                            </button>
+
+                        </form>
 
 
-            </tbody>
+                    </div>
 
 
-        </table>
+                </td>
 
+
+            </tr>
+
+
+        {% endfor %}
+
+
+        </tbody>
+
+
+    </table>
+
+
+    {% else %}
+
+
+    <div class="no-records">
+
+        <h3>
+            No Fee Records Found
+        </h3>
+
+        {% if selected_status == "PAID" %}
+
+            <p>
+                There are no paid fee records.
+            </p>
+
+        {% elif selected_status == "UNPAID" %}
+
+            <p>
+                There are no unpaid fee records.
+            </p>
+
+        {% elif selected_status == "OVERDUE" %}
+
+            <p>
+                There are no overdue fee records.
+            </p>
 
         {% else %}
 
-
-        <div class="no-records">
-
-            <h3>
-                No Fee Records Found
-            </h3>
-
-            {% if selected_status == "PAID" %}
-
-                <p>
-                    There are no paid fee records.
-                </p>
-
-            {% elif selected_status == "UNPAID" %}
-
-                <p>
-                    There are no unpaid fee records.
-                </p>
-
-            {% elif selected_status == "OVERDUE" %}
-
-                <p>
-                    There are no overdue fee records.
-                </p>
-
-            {% else %}
-
-                <p>
-                    Generate a challan first and the fee
-                    record will appear here.
-                </p>
-
-            {% endif %}
-
-        </div>
-
+            <p>
+                Generate a challan first and the fee
+                record will appear here.
+            </p>
 
         {% endif %}
-
 
     </div>
 
 
+    {% endif %}
+
+
+</div>
+```
+
 </div>
 
+<!-- =====================================================
+     DELETE ALL CONFIRMATION
+===================================================== -->
+
+<script>
+
+function confirmDeleteAll() {
+
+    return confirm(
+        "WARNING!\n\n" +
+        "This will permanently delete ALL fee payment records " +
+        "for the current school/portfolio.\n\n" +
+        "Student information will NOT be deleted.\n\n" +
+        "This action cannot be undone.\n\n" +
+        "Are you sure you want to continue?"
+    );
+
+}
+
+</script>
 
 </body>
 
 </html>
-

@@ -124,6 +124,15 @@ h1 {
     background: #15803d;
 }
 
+.delete-all {
+    background: #dc2626;
+    color: white;
+}
+
+.delete-all:hover {
+    background: #b91c1c;
+}
+
 .back {
     background: #e0e7ff;
     color: #172554;
@@ -228,10 +237,8 @@ tr:hover {
         flex-shrink: 0;
     }
 
-    .all-challans {
-        text-align: center;
-    }
-
+    .all-challans,
+    .delete-all,
     .back {
         text-align: center;
     }
@@ -319,6 +326,25 @@ tr:hover {
         >
             Generate All Challans
         </a>
+
+
+        <!-- DELETE ALL STUDENTS -->
+
+        <form
+            action="/students/delete-all"
+            method="POST"
+            style="margin: 0;"
+            onsubmit="return confirmDeleteAll();"
+        >
+
+            <button
+                type="submit"
+                class="button delete-all"
+            >
+                Delete All Students
+            </button>
+
+        </form>
 
 
         <!-- BACK -->
@@ -453,7 +479,39 @@ tr:hover {
 
 </div>
 
+
+<script>
+
+/* =========================
+   DELETE ALL CONFIRMATION
+========================= */
+
+function confirmDeleteAll() {
+
+    const totalStudents = {{ students|length }};
+
+    if (totalStudents === 0) {
+
+        alert("There are no students to delete.");
+
+        return false;
+
+    }
+
+    return confirm(
+        "WARNING!\n\n" +
+        "You are about to delete ALL " +
+        totalStudents +
+        " students.\n\n" +
+        "Their associated fee payment records will also be deleted.\n\n" +
+        "This action cannot be undone.\n\n" +
+        "Are you sure you want to continue?"
+    );
+
+}
+
+</script>
+
 </body>
 
 </html>
-

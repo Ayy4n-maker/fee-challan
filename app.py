@@ -32,7 +32,7 @@ STAFF_PASSWORD = os.environ.get("STAFF_PASSWORD", "staff123")
 
 
 # ==========================================================
-# HELPER — short display ID
+# HELPER — SHORT DISPLAY ID
 # ==========================================================
 
 def short_id(doc_id):
@@ -41,11 +41,12 @@ def short_id(doc_id):
 
 
 # ==========================================================
-# HELPER — Firestore document to dictionary
+# HELPER — FIRESTORE DOCUMENT TO DICTIONARY
 # ==========================================================
 
 def doc_to_dict(doc, default_index=1):
     """Convert Firestore DocumentSnapshot to a plain dictionary."""
+
     d = doc.to_dict() or {}
     d["id"] = doc.id
 
@@ -132,9 +133,7 @@ def is_doc_in_portfolio(doc_dict):
 
 
 def get_portfolio_docs(collection_name):
-    """
-    Fetch all documents belonging to active portfolio.
-    """
+    """Fetch all documents belonging to active portfolio."""
 
     db = get_firestore_db()
     pid = get_current_portfolio_id()
@@ -146,16 +145,18 @@ def get_portfolio_docs(collection_name):
         return [
             d for d in all_docs
             if (d.to_dict() or {}).get("portfolio_id")
-            in (None, "", DEFAULT_PORTFOLIO_ID)
+            in (
+                None,
+                "",
+                DEFAULT_PORTFOLIO_ID
+            )
         ]
 
-    else:
-
-        return db.collection(collection_name).where(
-            "portfolio_id",
-            "==",
-            pid
-        ).get()
+    return db.collection(collection_name).where(
+        "portfolio_id",
+        "==",
+        pid
+    ).get()
 
 
 def get_user_by_credentials(username, password, role):
@@ -190,17 +191,6 @@ def get_user_by_credentials(username, password, role):
 
         # ------------------------------------------------------
         # FIRST PORTFOLIO ADMIN LOGIN FIX
-        #
-        # If the original admin account is:
-        #
-        # Username: admin
-        # Password: admin1234
-        #
-        # find the EXISTING Firestore admin account and use
-        # its existing portfolio_id.
-        #
-        # This prevents the first portfolio from being lost
-        # or replaced by default_portfolio.
         # ------------------------------------------------------
 
         if (
@@ -224,7 +214,9 @@ def get_user_by_credentials(username, password, role):
 
     except Exception as e:
 
-        print(f"Firestore user lookup error: {e}")
+        print(
+            f"Firestore user lookup error: {e}"
+        )
 
     # ----------------------------------------------------------
     # DEFAULT ADMIN
@@ -982,17 +974,6 @@ def students():
 
     ]
 
-    # ------------------------------------------------------
-    # SORT:
-    # Playgroup
-    # Prep 1
-    # Prep 2
-    # Class 1
-    # Class 2
-    # ...
-    # Class 10
-    # ------------------------------------------------------
-
     student_list.sort(
         key=lambda s: (
             class_sort_order(
@@ -1105,16 +1086,6 @@ def generate_challan_list():
 
 # ==========================================================
 # ADD STUDENT
-#
-# UPDATED:
-# Mother Contact Number
-# Father Contact Number
-#
-# Classes:
-# Playgroup
-# Prep 1
-# Prep 2
-# Class 1–10
 # ==========================================================
 
 @app.route(
@@ -1160,10 +1131,6 @@ def add_student():
             "section",
             ""
         )
-
-        # --------------------------------------------------
-        # NEW CONTACT FIELDS
-        # --------------------------------------------------
 
         mother_phone = request.form.get(
             "mother_phone",
@@ -1249,10 +1216,6 @@ def add_student():
             ) + 1
         )
 
-        # --------------------------------------------------
-        # SAVE STUDENT
-        # --------------------------------------------------
-
         db.collection(
             "students"
         ).add({
@@ -1275,7 +1238,6 @@ def add_student():
 
             "section": section,
 
-            # NEW CONTACT FIELDS
             "mother_phone": mother_phone,
 
             "father_phone": father_phone,
@@ -1301,16 +1263,6 @@ def add_student():
 
 # ==========================================================
 # UPDATE STUDENT
-#
-# UPDATED:
-# Mother Contact Number
-# Father Contact Number
-#
-# Classes:
-# Playgroup
-# Prep 1
-# Prep 2
-# Class 1–10
 # ==========================================================
 
 @app.route(
@@ -1380,10 +1332,6 @@ def update_student(student_id):
             ""
         )
 
-        # --------------------------------------------------
-        # NEW CONTACT FIELDS
-        # --------------------------------------------------
-
         mother_phone = request.form.get(
             "mother_phone",
             ""
@@ -1426,10 +1374,6 @@ def update_student(student_id):
 
             monthly_fee = 0.0
 
-        # --------------------------------------------------
-        # UPDATE STUDENT
-        # --------------------------------------------------
-
         ref.update({
 
             "student_name": student_name,
@@ -1446,7 +1390,6 @@ def update_student(student_id):
 
             "section": section,
 
-            # NEW CONTACT FIELDS
             "mother_phone": mother_phone,
 
             "father_phone": father_phone,
@@ -1513,7 +1456,11 @@ def delete_student(student_id):
 
     for payment in payments:
 
-        payment.reference.delete()
+        payment_data = payment.to_dict() or {}
+
+        if is_doc_in_portfolio(payment_data):
+
+            payment.reference.delete()
 
     ref.delete()
 
@@ -1521,8 +1468,16 @@ def delete_student(student_id):
         url_for("students")
     )
 
+
 # ==========================================================
 # DELETE ALL STUDENTS
+#
+# Deletes:
+# 1. All students in current portfolio
+# 2. Their associated fee payment records
+#
+# IMPORTANT:
+# This only affects the currently logged-in portfolio.
 # ==========================================================
 
 @app.route(
@@ -1534,21 +1489,18 @@ def delete_all_students():
 
     db = get_firestore_db()
 
-    # Get only students from the current portfolio
     students_docs = get_portfolio_docs(
         "students"
     )
-
-    deleted_count = 0
 
     for student_doc in students_docs:
 
         student_id = student_doc.id
 
-        # Delete all fee payment records
-        # belonging to this student
         payments = (
-            db.collection("fee_payments")
+            db.collection(
+                "fee_payments"
+            )
             .where(
                 "student_id",
                 "==",
@@ -1559,22 +1511,21 @@ def delete_all_students():
 
         for payment in payments:
 
-            # Only delete payment records
-            # belonging to the current portfolio
+            payment_data = payment.to_dict() or {}
+
             if is_doc_in_portfolio(
-                payment.to_dict()
+                payment_data
             ):
 
                 payment.reference.delete()
 
-        # Delete the student
         student_doc.reference.delete()
-
-        deleted_count += 1
 
     return redirect(
         url_for("students")
     )
+
+
 # ==========================================================
 # INDIVIDUAL CHALLAN
 # ==========================================================
@@ -1742,7 +1693,7 @@ def generate_challan(student_id):
                 existing_doc
             )
 
-            if existing["status"] == "PAID":
+            if existing.get("status") == "PAID":
 
                 return render_template(
 
@@ -1772,25 +1723,30 @@ def generate_challan(student_id):
 
                     fee_month=fee_month,
 
-                    tuition_fee=existing[
-                        "tuition_fee"
-                    ],
+                    tuition_fee=existing.get(
+                        "tuition_fee",
+                        0
+                    ),
 
-                    other_fee=existing[
-                        "other_fee"
-                    ],
+                    other_fee=existing.get(
+                        "other_fee",
+                        0
+                    ),
 
-                    late_fee=existing[
-                        "late_fee"
-                    ],
+                    late_fee=existing.get(
+                        "late_fee",
+                        0
+                    ),
 
-                    discount=existing[
-                        "discount"
-                    ],
+                    discount=existing.get(
+                        "discount",
+                        0
+                    ),
 
-                    total_payable=existing[
-                        "total_payable"
-                    ]
+                    total_payable=existing.get(
+                        "total_payable",
+                        0
+                    )
                 )
 
             existing_doc.reference.update({
@@ -2632,7 +2588,31 @@ def delete_fee_payment(payment_id):
             "fee_payments"
         )
     )
+# ==========================================================
+# DELETE All FEE RECORD
+# ==========================================================
+@app.route(
+"/fee-payments/delete-all",
+methods=["POST"]
+)
+@login_required
+def delete_all_fee_payments():
 
+    db = get_firestore_db()
+
+    # Get only fee payment records
+    # belonging to the currently logged-in portfolio
+    payment_docs = get_portfolio_docs(
+        "fee_payments"
+    )
+
+    for payment_doc in payment_docs:
+
+        payment_doc.reference.delete()
+
+    return redirect(
+        url_for("fee_payments")
+    )
 
 # ==========================================================
 # TEACHERS MANAGEMENT
@@ -3157,4 +3137,3 @@ if __name__ == "__main__":
     app.run(
         debug=True
     )
-
