@@ -61,6 +61,7 @@ body {
     gap: 10px;
     flex-wrap: wrap;
     align-items: center;
+    width: 100%;
 }
 
 .button {
@@ -90,6 +91,51 @@ body {
     color: #172554;
     font-weight: bold;
     display: inline-block;
+}
+
+/* ==========================================================
+   SEARCH BAR
+   ========================================================== */
+
+.search-box {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+.search-box input::placeholder {
+    color: #888;
+}
+
+/* ==========================================================
+   DELETE ALL
+   ========================================================== */
+
+.delete-all-button {
+    padding: 12px 18px;
+    border-radius: 9px;
+    border: none;
+    color: white;
+    background: #dc2626;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.delete-all-button:hover {
+    background: #b91c1c;
 }
 
 .table-box {
@@ -147,6 +193,27 @@ tr:hover {
     background: #b91c1c;
 }
 
+.print-button {
+    background: #16a34a;
+    color: white;
+}
+
+.print-button:hover {
+    background: #15803d;
+}
+
+/* ==========================================================
+   NO SEARCH RESULTS
+   ========================================================== */
+
+.no-results {
+    text-align: center;
+    padding: 25px;
+    color: #666;
+    font-weight: bold;
+    display: none;
+}
+
 @media (max-width: 650px) {
 
     body {
@@ -168,6 +235,7 @@ tr:hover {
     }
 
     .top-buttons .button,
+    .top-buttons .delete-all-button,
     .student-count {
         text-align: center;
         width: 100%;
@@ -177,16 +245,17 @@ tr:hover {
         flex-direction: column;
     }
 
-.print-button {
-    background: #16a34a;
-    color: white;
+    .search-box input {
+        width: 100%;
+    }
 }
 
-.print-button:hover {
-    background: #15803d;
-}
+/* ==========================================================
+   PRINT
+   ========================================================== */
 
 @media print {
+
     body {
         background: white;
         padding: 0;
@@ -198,9 +267,23 @@ tr:hover {
         max-width: 100%;
     }
 
-    .top-buttons, .actions, th:last-child, td:last-child {
+    .top-buttons,
+    .actions,
+    .search-box,
+    th:last-child,
+    td:last-child {
         display: none !important;
     }
+
+    tr {
+        display: table-row !important;
+    }
+
+    td,
+    th {
+        display: table-cell !important;
+    }
+
 }
 
 </style>
@@ -217,7 +300,6 @@ tr:hover {
 src="{{ url_for('static', filename='logo.png') }}"
 class="logo"
 alt="IESC Logo"
-
 >
 
 <div class="subtitle">
@@ -238,11 +320,29 @@ alt="IESC Logo"
     Add Student
 </a>
 
-<button onclick="window.print()" class="button print-button">
+<button type="button" onclick="window.print()" class="button print-button">
     Print Roster
 </button>
 
-<div class="student-count">
+<form
+    action="/students/delete-all"
+    method="POST"
+    style="margin: 0;"
+    onsubmit="return confirmDeleteAll();"
+>
+
+<button
+    type="submit"
+    class="delete-all-button"
+>
+
+    Delete All Students
+
+</button>
+
+</form>
+
+<div class="student-count" id="studentCount">
     Total Students: {{ students|length }}
 </div>
 
@@ -250,9 +350,26 @@ alt="IESC Logo"
 
 </div>
 
+<!-- ==========================================================
+     SEARCH
+     ========================================================== -->
+
+<div class="search-box">
+
+<input
+    type="text"
+    id="studentSearch"
+    placeholder="Search student by Roll No."
+    autocomplete="off"
+>
+
+</div>
+
 <div class="table-box">
 
-<table>
+<table id="studentsTable">
+
+<thead>
 
 <tr>
     <th>ID</th>
@@ -263,19 +380,23 @@ alt="IESC Logo"
     <th>Actions</th>
 </tr>
 
+</thead>
+
+<tbody>
+
 {% for student in students %}
 
-<tr>
+<tr class="student-row">
 
 <td>
-    {{ student.display_id }}
+    {{ student.display_id or student.id }}
 </td>
 
 <td>
     {{ student.student_name }}
 </td>
 
-<td>
+<td class="roll-number">
     {{ student.roll_no }}
 </td>
 
@@ -294,12 +415,9 @@ alt="IESC Logo"
 <a
 href="/students/update/{{ student.id }}"
 class="button update"
-
 >
 
-
-Update
-
+    Update
 
 </a>
 
@@ -312,12 +430,9 @@ Update
 type="submit"
 class="delete-button"
 onclick="return confirm('Delete this student?')"
-
 >
 
-
-Delete
-
+    Delete
 
 </button>
 
@@ -331,12 +446,132 @@ Delete
 
 {% endfor %}
 
+<tr id="noResults">
+
+<td colspan="6" class="no-results">
+    No student found with this Roll No.
+</td>
+
+</tr>
+
+</tbody>
+
 </table>
 
 </div>
 
 </div>
 
+
+<script>
+
+/* ==========================================================
+   SEARCH STUDENTS BY ROLL NUMBER
+   ========================================================== */
+
+const searchInput = document.getElementById("studentSearch");
+
+const studentRows = document.querySelectorAll(".student-row");
+
+const studentCount = document.getElementById("studentCount");
+
+const noResults = document.getElementById("noResults");
+
+
+searchInput.addEventListener("input", function() {
+
+    const searchValue = this.value
+        .trim()
+        .toLowerCase();
+
+    let visibleStudents = 0;
+
+    studentRows.forEach(function(row) {
+
+        const rollNumberCell =
+            row.querySelector(".roll-number");
+
+        const rollNumber =
+            rollNumberCell
+                ? rollNumberCell.textContent
+                    .trim()
+                    .toLowerCase()
+                : "";
+
+        if (
+            searchValue === ""
+            || rollNumber.includes(searchValue)
+        ) {
+
+            row.style.display = "";
+
+            visibleStudents++;
+
+        } else {
+
+            row.style.display = "none";
+
+        }
+
+    });
+
+
+    /* Update student count */
+
+    studentCount.textContent =
+        "Total Students: " + visibleStudents;
+
+
+    /* Show/hide no results message */
+
+    if (
+        visibleStudents === 0
+        && searchValue !== ""
+    ) {
+
+        noResults.style.display = "table-row";
+
+    } else {
+
+        noResults.style.display = "none";
+
+    }
+
+});
+
+
+/* ==========================================================
+   DELETE ALL CONFIRMATION
+   ========================================================== */
+
+function confirmDeleteAll() {
+
+    const totalStudents =
+        {{ students|length }};
+
+    if (totalStudents === 0) {
+
+        alert("There are no students to delete.");
+
+        return false;
+
+    }
+
+    return confirm(
+        "WARNING!\n\n" +
+        "You are about to delete ALL " +
+        totalStudents +
+        " students.\n\n" +
+        "Their associated fee payment records will also be deleted.\n\n" +
+        "This action cannot be undone.\n\n" +
+        "Are you sure you want to continue?"
+    );
+
+}
+
+</script>
+
 </body>
 
 </html>
+

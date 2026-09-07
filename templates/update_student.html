@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -222,8 +223,11 @@
             <!-- STUDENT INFORMATION -->
 
             <div class="section-title">
+
                 Student Information
+
             </div>
+
 
             <div class="form-grid">
 
@@ -231,7 +235,9 @@
                 <div class="form-group">
 
                     <label>
+
                         Student Name <span class="required">*</span>
+
                     </label>
 
                     <input
@@ -247,7 +253,9 @@
                 <div class="form-group">
 
                     <label>
+
                         Roll No. <span class="required">*</span>
+
                     </label>
 
                     <input
@@ -263,7 +271,9 @@
                 <div class="form-group">
 
                     <label>
+
                         Father's Name <span class="required">*</span>
+
                     </label>
 
                     <input
@@ -279,7 +289,9 @@
                 <div class="form-group">
 
                     <label>
+
                         Date of Birth
+
                     </label>
 
                     <input
@@ -294,23 +306,31 @@
                 <div class="form-group">
 
                     <label>
+
                         Gender
+
                     </label>
 
                     <select name="gender">
 
                         <option value="">
+
                             Select Gender
+
                         </option>
 
                         <option value="Male"
                             {% if student.gender == "Male" %}selected{% endif %}>
+
                             Male
+
                         </option>
 
                         <option value="Female"
                             {% if student.gender == "Female" %}selected{% endif %}>
+
                             Female
+
                         </option>
 
                     </select>
@@ -321,23 +341,109 @@
                 <div class="form-group">
 
                     <label>
+
                         Class <span class="required">*</span>
+
                     </label>
 
                     <select name="class_name" required>
 
                         <option value="">
+
                             Select Class
+
                         </option>
 
-                        {% for class in ["6", "7", "8", "9", "10", "11", "12"] %}
+                        <option value="Playgroup"
+                            {% if student.class_name == "Playgroup" %}selected{% endif %}>
 
-                        <option value="{{ class }}"
-                            {% if student.class_name == class %}selected{% endif %}>
-                            Class {{ class }}
+                            Playgroup
+
                         </option>
 
-                        {% endfor %}
+                        <option value="Prep 1"
+                            {% if student.class_name == "Prep 1" %}selected{% endif %}>
+
+                            Prep 1
+
+                        </option>
+
+                        <option value="Prep 2"
+                            {% if student.class_name == "Prep 2" %}selected{% endif %}>
+
+                            Prep 2
+
+                        </option>
+
+                        <option value="1"
+                            {% if student.class_name == "1" %}selected{% endif %}>
+
+                            Class 1
+
+                        </option>
+
+                        <option value="2"
+                            {% if student.class_name == "2" %}selected{% endif %}>
+
+                            Class 2
+
+                        </option>
+
+                        <option value="3"
+                            {% if student.class_name == "3" %}selected{% endif %}>
+
+                            Class 3
+
+                        </option>
+
+                        <option value="4"
+                            {% if student.class_name == "4" %}selected{% endif %}>
+
+                            Class 4
+
+                        </option>
+
+                        <option value="5"
+                            {% if student.class_name == "5" %}selected{% endif %}>
+
+                            Class 5
+
+                        </option>
+
+                        <option value="6"
+                            {% if student.class_name == "6" %}selected{% endif %}>
+
+                            Class 6
+
+                        </option>
+
+                        <option value="7"
+                            {% if student.class_name == "7" %}selected{% endif %}>
+
+                            Class 7
+
+                        </option>
+
+                        <option value="8"
+                            {% if student.class_name == "8" %}selected{% endif %}>
+
+                            Class 8
+
+                        </option>
+
+                        <option value="9"
+                            {% if student.class_name == "9" %}selected{% endif %}>
+
+                            Class 9
+
+                        </option>
+
+                        <option value="10"
+                            {% if student.class_name == "10" %}selected{% endif %}>
+
+                            Class 10
+
+                        </option>
 
                     </select>
 
@@ -347,7 +453,9 @@
                 <div class="form-group">
 
                     <label>
+
                         Section
+
                     </label>
 
                     <input
@@ -365,8 +473,11 @@
             <!-- CONTACT INFORMATION -->
 
             <div class="section-title">
+
                 Contact Information
+
             </div>
+
 
             <div class="form-grid">
 
@@ -374,13 +485,15 @@
                 <div class="form-group">
 
                     <label>
-                        Student Contact Number
+
+                        Mother's Contact Number
+
                     </label>
 
                     <input
                         type="tel"
-                        name="student_phone"
-                        value="{{ student.student_phone or '' }}"
+                        name="mother_phone"
+                        value="{{ student.mother_phone or '' }}"
                         placeholder="03XX-XXXXXXX"
                     >
 
@@ -390,13 +503,15 @@
                 <div class="form-group">
 
                     <label>
-                        Parent / Guardian Contact <span class="required">*</span>
+
+                        Father's Contact Number <span class="required">*</span>
+
                     </label>
 
                     <input
                         type="tel"
-                        name="parent_phone"
-                        value="{{ student.parent_phone }}"
+                        name="father_phone"
+                        value="{{ student.father_phone or '' }}"
                         placeholder="03XX-XXXXXXX"
                         required
                     >
@@ -407,7 +522,9 @@
                 <div class="form-group full-width">
 
                     <label>
+
                         Address
+
                     </label>
 
                     <textarea
@@ -423,8 +540,11 @@
             <!-- FEE INFORMATION -->
 
             <div class="section-title">
+
                 Fee Information
+
             </div>
+
 
             <div class="form-grid">
 
@@ -432,7 +552,9 @@
                 <div class="form-group">
 
                     <label>
+
                         Monthly Fee (Rupees) <span class="required">*</span>
+
                     </label>
 
                     <input
@@ -450,33 +572,52 @@
                 <div class="form-group">
 
                     <label>
+
                         Fee of Month <span class="required">*</span>
+
                     </label>
 
                     <select name="fee_month">
 
                         <option value="">
+
                             Select Month
+
                         </option>
 
                         {% for month in [
+
                             "January",
+
                             "February",
+
                             "March",
+
                             "April",
+
                             "May",
+
                             "June",
+
                             "July",
+
                             "August",
+
                             "September",
+
                             "October",
+
                             "November",
+
                             "December"
+
                         ] %}
 
                         <option value="{{ month }}"
                             {% if student.fee_month == month %}selected{% endif %}>
+
                             {{ month }}
+
                         </option>
 
                         {% endfor %}
@@ -491,8 +632,11 @@
             <!-- PREVIOUS EDUCATION -->
 
             <div class="section-title">
+
                 Previous Education
+
             </div>
+
 
             <div class="form-grid">
 
@@ -500,7 +644,9 @@
                 <div class="form-group">
 
                     <label>
+
                         Previous School
+
                     </label>
 
                     <input
@@ -516,7 +662,9 @@
                 <div class="form-group">
 
                     <label>
+
                         Previous Coaching
+
                     </label>
 
                     <input
@@ -539,7 +687,9 @@
                     type="submit"
                     class="btn btn-save"
                 >
+
                     Save Changes
+
                 </button>
 
 
@@ -547,7 +697,9 @@
                     href="/students"
                     class="btn btn-cancel"
                 >
+
                     Cancel
+
                 </a>
 
             </div>
@@ -558,7 +710,9 @@
         <div class="footer">
 
             Irshad Educational Academy
+
             <br>
+
             Academic Session 2026–2027
 
         </div>
@@ -568,3 +722,4 @@
 </body>
 
 </html>
+
