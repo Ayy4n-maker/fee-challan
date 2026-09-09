@@ -4,9 +4,25 @@
     {
       "src": "app.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "backup.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
+    {
+      "src": "/admin/backup/download",
+      "dest": "backup.py"
+    },
+    {
+      "src": "/admin/backup",
+      "dest": "backup.py"
+    },
+    {
+      "src": "/admin",
+      "dest": "backup.py"
+    },
     {
       "src": "/(.*)",
       "dest": "app.py"
