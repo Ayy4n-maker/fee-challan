@@ -38,6 +38,23 @@ def _rows(collection):
     return result
 
 
+def _teacher_rows():
+    """Export teachers with the same ID used on the website."""
+    rows = _rows("teachers")
+    for index, row in enumerate(rows, start=1):
+        # The teachers page displays teacher.display_id. The application uses
+        # the teacher record's existing display ID when available; otherwise
+        # use the same sequential fallback used by doc_to_dict in app.py.
+        display_id = row.get("display_id")
+        if display_id in (None, ""):
+            display_id = row.get("id")
+        if display_id in (None, ""):
+            display_id = index
+        row["display_id"] = display_id
+        row.pop("document_id", None)
+    return rows
+
+
 def _money(row, *names):
     for name in names:
         try:
@@ -94,7 +111,7 @@ def _date_match(row, month, year):
 def _build(month=None, year=None):
     monthly = month is not None and year is not None
     students = _rows("students")
-    teachers = _rows("teachers")
+    teachers = _teacher_rows()
     payments = _rows("fee_payments")
     expenses = _rows("expenses")
     challans = _rows("challans")
