@@ -3,6 +3,7 @@ from datetime import date, timedelta
 import os
 import uuid
 from functools import wraps
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from firebase_config import get_firestore_db
 
@@ -130,7 +131,6 @@ def get_portfolio_docs(collection_name):
     pid = get_current_portfolio_id()
 
     if pid == DEFAULT_PORTFOLIO_ID:
-
         all_docs = db.collection(collection_name).get()
 
         return [
@@ -164,44 +164,46 @@ def get_user_by_credentials(username, password, role):
         ).get()
 
         # ------------------------------------------------------
-        # NORMAL FIRESTORE LOGIN
+        # FIRESTORE LOGIN — SUPPORT HASHED AND LEGACY PASSWORDS
         # ------------------------------------------------------
 
         for d in docs:
 
             u = d.to_dict() or {}
 
-            if (
-                u.get("username", "").strip().lower() == uname
-                and u.get("password") == password
-            ):
+            if u.get("username", "").strip().lower() != uname:
+                continue
 
+            stored_password = u.get("password") or ""
+            password_matches = False
+
+            # New records use Werkzeug password hashes.
+            try:
+                password_matches = check_password_hash(
+                    stored_password,
+                    password
+                )
+            except (ValueError, TypeError):
+                password_matches = False
+
+            # Existing records may still contain a legacy plaintext password.
+            if not password_matches and stored_password == password:
+                password_matches = True
+
+                # Upgrade the legacy plaintext password immediately after
+                # successful authentication.
+                try:
+                    d.reference.update({
+                        "password": generate_password_hash(password)
+                    })
+                except Exception as e:
+                    print(
+                        f"Error upgrading password hash: {e}"
+                    )
+
+            if password_matches:
                 u["id"] = d.id
-
                 return u
-
-        # ------------------------------------------------------
-        # FIRST PORTFOLIO ADMIN LOGIN FIX
-        # ------------------------------------------------------
-
-        if (
-            role == "admin"
-            and uname == "admin"
-            and password == "admin1234"
-        ):
-
-            for d in docs:
-
-                u = d.to_dict() or {}
-
-                if (
-                    u.get("username", "").strip().lower()
-                    == "admin"
-                ):
-
-                    u["id"] = d.id
-
-                    return u
 
     except Exception as e:
 
@@ -473,7 +475,7 @@ def admin():
     )
 
     staff_username = STAFF_USERNAME
-    staff_password = STAFF_PASSWORD
+    staff_password = "********"
 
     try:
 
@@ -499,11 +501,6 @@ def admin():
             staff_username = st.get(
                 "username",
                 staff_username
-            )
-
-            staff_password = st.get(
-                "password",
-                staff_password
             )
 
     except Exception as e:
@@ -572,7 +569,7 @@ def update_staff_credentials():
         ""
     ).strip()
 
-    if not new_staff_username or not new_staff_password:
+    if not new_staff_username:
 
         return redirect(
             url_for("admin")
@@ -600,21 +597,40 @@ def update_staff_credentials():
 
         if staff_docs:
 
-            staff_docs[0].reference.update({
+            staff_doc = staff_docs[0]
+            staff_data = staff_doc.to_dict() or {}
 
+            update_data = {
                 "username": new_staff_username,
+            }
 
-                "password": new_staff_password,
+            # The dashboard shows a masked password. If the mask is submitted,
+            # keep the existing password unchanged. Otherwise hash the new one.
+            if new_staff_password and new_staff_password != "********":
+                update_data["password"] = generate_password_hash(
+                    new_staff_password
+                )
+            elif not staff_data.get("password"):
+                return redirect(
+                    url_for("admin")
+                )
 
-            })
+            staff_doc.reference.update(update_data)
 
         else:
+
+            if not new_staff_password or new_staff_password == "********":
+                return redirect(
+                    url_for("admin")
+                )
 
             db.collection("users").add({
 
                 "username": new_staff_username,
 
-                "password": new_staff_password,
+                "password": generate_password_hash(
+                    new_staff_password
+                ),
 
                 "role": "staff",
 
@@ -772,7 +788,9 @@ def register():
 
             "username": admin_username,
 
-            "password": admin_password,
+            "password": generate_password_hash(
+                admin_password
+            ),
 
             "role": "admin",
 
@@ -788,7 +806,9 @@ def register():
 
             "username": staff_username,
 
-            "password": staff_password,
+            "password": generate_password_hash(
+                staff_password
+            ),
 
             "role": "staff",
 
