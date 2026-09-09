@@ -22,6 +22,63 @@ from firebase_admin import credentials, firestore
 _db = None
 
 
+class _FeePaymentsCollectionWrapper:
+    """Add the website Student ID whenever a fee payment is created."""
+
+    def __init__(self, collection_ref, db):
+        self._collection_ref = collection_ref
+        self._db = db
+
+    def add(self, document_data, *args, **kwargs):
+        data = dict(document_data or {})
+
+        student_id = data.get("student_id")
+
+        if student_id and not data.get("student_display_id"):
+            try:
+                student_doc = (
+                    self._db.collection("students")
+                    .document(student_id)
+                    .get()
+                )
+
+                if student_doc.exists:
+                    student_data = student_doc.to_dict() or {}
+                    serial = student_data.get("serial_id")
+
+                    if serial is not None:
+                        try:
+                            serial = int(serial)
+                            data["student_display_id"] = "%03d" % serial
+                        except (ValueError, TypeError):
+                            pass
+            except Exception as exc:
+                print(f"Error setting fee payment student display ID: {exc}")
+
+        return self._collection_ref.add(data, *args, **kwargs)
+
+    def __getattr__(self, name):
+        return getattr(self._collection_ref, name)
+
+
+class _FirestoreClientWrapper:
+    """Delegate to Firestore while adding the fee-payment ID fix."""
+
+    def __init__(self, db):
+        self._db = db
+
+    def collection(self, name):
+        collection_ref = self._db.collection(name)
+
+        if name == "fee_payments":
+            return _FeePaymentsCollectionWrapper(collection_ref, self._db)
+
+        return collection_ref
+
+    def __getattr__(self, name):
+        return getattr(self._db, name)
+
+
 def get_firestore_db():
     """Return a singleton Firestore client."""
 
@@ -57,6 +114,6 @@ def get_firestore_db():
 
             firebase_admin.initialize_app(cred)
 
-        _db = firestore.client()
+        _db = _FirestoreClientWrapper(firestore.client())
 
     return _db
