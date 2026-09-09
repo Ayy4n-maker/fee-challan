@@ -23,7 +23,7 @@ _db = None
 
 
 class _FeePaymentsCollectionWrapper:
-    """Add the website Student ID whenever a fee payment is created."""
+    """Add website Student IDs and support searching by those IDs."""
 
     def __init__(self, collection_ref, db):
         self._collection_ref = collection_ref
@@ -57,12 +57,113 @@ class _FeePaymentsCollectionWrapper:
 
         return self._collection_ref.add(data, *args, **kwargs)
 
+    def where(self, field_path, op_string=None, value=None, **kwargs):
+        """Allow the Fee Payments search to use the website Student ID."""
+
+        if (
+            field_path == "student_id"
+            and op_string == "=="
+            and value is not None
+        ):
+            search_value = str(value).strip()
+
+            # If the submitted value is already a Firestore document ID,
+            # preserve the original query behavior.
+            try:
+                direct_doc = (
+                    self._db.collection("students")
+                    .document(search_value)
+                    .get()
+                )
+            except Exception:
+                direct_doc = None
+
+            if direct_doc is not None and direct_doc.exists:
+                return self._collection_ref.where(
+                    field_path,
+                    op_string,
+                    search_value,
+                    **kwargs
+                )
+
+            # Otherwise treat the value as the website Student ID (001, 002...).
+            try:
+                serial = int(search_value)
+            except (ValueError, TypeError):
+                return self._collection_ref.where(
+                    field_path,
+                    op_string,
+                    search_value,
+                    **kwargs
+                )
+
+            try:
+                from flask import session
+                current_portfolio_id = session.get(
+                    "portfolio_id",
+                    "default_portfolio"
+                )
+            except Exception:
+                current_portfolio_id = "default_portfolio"
+
+            students = self._db.collection("students").get()
+            matching_student_id = None
+
+            for student_doc in students:
+                student_data = student_doc.to_dict() or {}
+                student_portfolio = student_data.get("portfolio_id")
+
+                if current_portfolio_id == "default_portfolio":
+                    in_portfolio = student_portfolio in (
+                        None,
+                        "",
+                        "default_portfolio"
+                    )
+                else:
+                    in_portfolio = student_portfolio == current_portfolio_id
+
+                if not in_portfolio:
+                    continue
+
+                try:
+                    student_serial = int(student_data.get("serial_id"))
+                except (ValueError, TypeError):
+                    continue
+
+                if student_serial == serial:
+                    matching_student_id = student_doc.id
+                    break
+
+            if matching_student_id:
+                return self._collection_ref.where(
+                    "student_id",
+                    "==",
+                    matching_student_id,
+                    **kwargs
+                )
+
+            # No matching Student ID: keep the original query so it returns
+            # no matching payment records instead of raising an error.
+            return self._collection_ref.where(
+                field_path,
+                op_string,
+                search_value,
+                **kwargs
+            )
+
+        return self._collection_ref.where(
+            field_path,
+            op_string,
+            value,
+            **kwargs
+        )
+
     def __getattr__(self, name):
         return getattr(self._collection_ref, name)
 
 
 class _FirestoreClientWrapper:
-    """Delegate to Firestore while adding the fee-payment ID fix."""
+    """Delegate to Firestore while adding fee-payment ID support."""
 
     def __init__(self, db):
         self._db = db
