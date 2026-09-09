@@ -1,59 +1,72 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Students | IESC Fee Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
+    font-family: 'Inter', Arial, sans-serif;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #dbeafe 100%);
     min-height: 100vh;
-    padding: 35px 20px;
+    padding: 30px 15px 50px;
+    color: #1e293b;
 }
 
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1250px;
     margin: auto;
     background: white;
-    padding: 35px;
+    padding: 30px;
     border-radius: 18px;
-    box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 30px rgba(30,58,138,0.10);
+    border: 1px solid rgba(30,58,138,0.06);
 }
 
+/* HEADER */
 .header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 26px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .logo {
-    width: 150px;
-    height: 95px;
+    width: 110px;
+    height: 70px;
     object-fit: contain;
+    margin-bottom: 8px;
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1e3a8a;
+    letter-spacing: -0.4px;
+    margin-bottom: 3px;
 }
 
 .subtitle {
-    color: #666;
-    font-size: 14px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
 }
 
+/* TOP BAR */
 .top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .top-buttons {
@@ -61,231 +74,188 @@ body {
     gap: 10px;
     flex-wrap: wrap;
     align-items: center;
-    width: 100%;
 }
 
-.button {
-    padding: 12px 18px;
-    border-radius: 9px;
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 18px;
+    border-radius: 10px;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 600;
     border: none;
     cursor: pointer;
-    display: inline-block;
+    font-size: 13px;
+    font-family: inherit;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
-.home {
-    background: #e0e7ff;
-    color: #172554;
-}
+.btn:hover { transform: translateY(-1px); }
 
-.add {
-    background: #172554;
-    color: white;
-}
+.btn-home   { background: #e0e7ff; color: #1e3a8a; }
+.btn-home:hover   { background: #c7d2fe; }
+
+.btn-add    { background: #1e3a8a; color: white; }
+.btn-add:hover    { background: #1d4ed8; box-shadow: 0 4px 14px rgba(29,78,216,0.28); }
+
+.btn-print  { background: #16a34a; color: white; }
+.btn-print:hover  { background: #15803d; box-shadow: 0 4px 14px rgba(21,128,61,0.28); }
+
+.btn-delete-all { background: #dc2626; color: white; }
+.btn-delete-all:hover { background: #b91c1c; box-shadow: 0 4px 14px rgba(220,38,38,0.28); }
 
 .student-count {
-    padding: 12px 18px;
-    border-radius: 9px;
-    background: #e0e7ff;
-    color: #172554;
-    font-weight: bold;
-    display: inline-block;
+    padding: 11px 18px;
+    border-radius: 10px;
+    background: #f0fdf4;
+    color: #15803d;
+    font-weight: 700;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #bbf7d0;
 }
 
-/* ==========================================================
-   SEARCH BAR
-   ========================================================== */
-
+/* SEARCH */
 .search-box {
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
+    position: relative;
 }
 
 .search-box input {
     width: 100%;
-    padding: 14px 16px;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    font-size: 15px;
-    outline: none;
+    padding: 13px 18px 13px 44px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #f8fafc;
+    transition: all 0.2s;
 }
 
 .search-box input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    outline: none;
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
 }
 
-.search-box input::placeholder {
-    color: #888;
+.search-box input::placeholder { color: #94a3b8; }
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #94a3b8;
+    pointer-events: none;
 }
 
-/* ==========================================================
-   DELETE ALL
-   ========================================================== */
-
-.delete-all-button {
-    padding: 12px 18px;
-    border-radius: 9px;
-    border: none;
-    color: white;
-    background: #dc2626;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.delete-all-button:hover {
-    background: #b91c1c;
-}
-
-.table-box {
-    overflow-x: auto;
-}
+/* TABLE */
+.table-box { overflow-x: auto; }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px;
+    min-width: 750px;
 }
 
-th {
-    background: #172554;
+thead th {
+    background: #1e3a8a;
     color: white;
-    padding: 14px;
+    padding: 13px 14px;
     text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
-td {
-    padding: 13px;
-    border-bottom: 1px solid #ddd;
+thead th:first-child { border-radius: 8px 0 0 0; }
+thead th:last-child  { border-radius: 0 8px 0 0; }
+
+tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #334155;
 }
 
-tr:hover {
-    background: #f8fafc;
-}
+tbody tr:hover { background: #f8fafc; }
+tbody tr:last-child td { border-bottom: none; }
 
-.actions {
-    display: flex;
-    gap: 7px;
-    flex-wrap: wrap;
-}
+.action-cell { display: flex; gap: 7px; flex-wrap: wrap; }
 
-.update {
+.btn-update {
     background: #2563eb;
     color: white;
+    padding: 7px 13px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background 0.2s;
 }
+.btn-update:hover { background: #1d4ed8; }
 
-.delete-button {
-    padding: 12px 18px;
-    border-radius: 9px;
-    border: none;
-    color: white;
+.btn-del {
     background: #dc2626;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.update:hover {
-    background: #1d4ed8;
-}
-
-.delete-button:hover {
-    background: #b91c1c;
-}
-
-.print-button {
-    background: #16a34a;
     color: white;
+    border: none;
+    padding: 7px 13px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+.btn-del:hover { background: #b91c1c; }
+
+.fee-chip {
+    display: inline-block;
+    background: #f0fdf4;
+    color: #15803d;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #bbf7d0;
 }
 
-.print-button:hover {
-    background: #15803d;
-}
-
-/* ==========================================================
-   NO SEARCH RESULTS
-   ========================================================== */
-
+/* NO RESULTS */
 .no-results {
     text-align: center;
-    padding: 25px;
-    color: #666;
-    font-weight: bold;
+    padding: 40px;
+    color: #64748b;
+    font-weight: 600;
     display: none;
 }
 
+/* RESPONSIVE */
 @media (max-width: 650px) {
-
-    body {
-        padding: 20px 12px;
-    }
-
-    .container {
-        padding: 25px 18px;
-    }
-
-    .top {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-
-    .top-buttons {
-        flex-direction: column;
-    }
-
-    .top-buttons .button,
-    .top-buttons .delete-all-button,
-    .student-count {
-        text-align: center;
-        width: 100%;
-    }
-
-    .actions {
-        flex-direction: column;
-    }
-
-    .search-box input {
-        width: 100%;
-    }
+    body { padding: 20px 10px 40px; }
+    .container { padding: 22px 16px; }
+    .top { flex-direction: column; align-items: stretch; }
+    .top-buttons { flex-direction: column; }
+    .top-buttons .btn, .student-count { text-align: center; width: 100%; justify-content: center; }
+    .action-cell { flex-direction: column; }
 }
 
-/* ==========================================================
-   PRINT
-   ========================================================== */
-
+/* PRINT */
 @media print {
-
-    body {
-        background: white;
-        padding: 0;
-    }
-
-    .container {
-        box-shadow: none;
-        padding: 0;
-        max-width: 100%;
-    }
-
-    .top-buttons,
-    .actions,
-    .search-box,
-    th:last-child,
-    td:last-child {
-        display: none !important;
-    }
-
-    tr {
-        display: table-row !important;
-    }
-
-    td,
-    th {
-        display: table-cell !important;
-    }
-
+    body { background: white; padding: 0; }
+    .container { box-shadow: none; padding: 0; max-width: 100%; }
+    .top-buttons, .action-cell, .search-box, thead th:last-child, tbody td:last-child { display: none !important; }
+    tr { display: table-row !important; }
+    td, th { display: table-cell !important; }
 }
-
 </style>
 
 </head>
@@ -294,275 +264,179 @@ tr:hover {
 
 <div class="container">
 
-<div class="header">
+    <div class="header">
+        <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="IESC Logo">
+        <h1>Students Information</h1>
+        <div class="subtitle">IESC Fee Management System — Student Roster</div>
+    </div>
 
-<img
-src="{{ url_for('static', filename='logo.png') }}"
-class="logo"
-alt="IESC Logo"
->
+    <div class="top">
+        <div class="top-buttons">
 
-<div class="subtitle">
-    Fee Management System — Student Roster
-</div>
+            <a href="{% if session.get('admin_logged_in') %}/admin{% else %}/staff{% endif %}" class="btn btn-home">
+                🏠 Dashboard
+            </a>
 
-</div>
+            <a href="/students/add" class="btn btn-add">
+                ➕ Add Student
+            </a>
 
-<div class="top">
+            <button type="button" onclick="window.print()" class="btn btn-print">
+                🖨️ Print Roster
+            </button>
 
-<div class="top-buttons">
+            <form
+                action="/students/delete-all"
+                method="POST"
+                style="margin: 0;"
+                onsubmit="return confirmDeleteAll();"
+            >
+                <button type="submit" class="btn btn-delete-all">
+                    🗑️ Delete All Students
+                </button>
+            </form>
 
-<a href="{% if session.get('admin_logged_in') %}/admin{% else %}/staff{% endif %}" class="button home">
-    Dashboard
-</a>
+        </div>
 
-<a href="/students/add" class="button add">
-    Add Student
-</a>
+        <div class="student-count" id="studentCount">
+            👨‍🎓 Total Students: {{ students|length }}
+        </div>
+    </div>
 
-<button type="button" onclick="window.print()" class="button print-button">
-    Print Roster
-</button>
+    <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+            type="text"
+            id="studentSearch"
+            placeholder="Search by name, roll number, or class..."
+            autocomplete="off"
+        >
+    </div>
 
-<form
-    action="/students/delete-all"
-    method="POST"
-    style="margin: 0;"
-    onsubmit="return confirmDeleteAll();"
->
+    <div class="table-box">
 
-<button
-    type="submit"
-    class="delete-all-button"
->
+        <table id="studentsTable">
 
-    Delete All Students
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student Name</th>
+                    <th>Roll No.</th>
+                    <th>Class</th>
+                    <th>Monthly Fee</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-</button>
+            <tbody>
 
-</form>
+            {% for student in students %}
 
-<div class="student-count" id="studentCount">
-    Total Students: {{ students|length }}
-</div>
+            <tr class="student-row">
 
-</div>
+                <td>{{ student.display_id or student.id }}</td>
 
-</div>
+                <td><strong>{{ student.student_name }}</strong></td>
 
-<!-- ==========================================================
-     SEARCH
-     ========================================================== -->
+                <td class="roll-number">{{ student.roll_no }}</td>
 
-<div class="search-box">
+                <td>
+                    <span style="display:inline-block;background:#eff6ff;color:#1d4ed8;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid #bfdbfe;">
+                        {{ student.class_name }}
+                    </span>
+                </td>
 
-<input
-    type="text"
-    id="studentSearch"
-    placeholder="Search student by Roll No."
-    autocomplete="off"
->
+                <td>
+                    <span class="fee-chip">Rs. {{ student.monthly_fee }}</span>
+                </td>
 
-</div>
+                <td>
+                    <div class="action-cell">
 
-<div class="table-box">
+                        <a href="/students/update/{{ student.id }}" class="btn-update">
+                            ✏️ Update
+                        </a>
 
-<table id="studentsTable">
+                        <form action="/students/delete/{{ student.id }}" method="POST">
+                            <button
+                                type="submit"
+                                class="btn-del"
+                                onclick="return confirm('Delete this student?')"
+                            >
+                                🗑 Delete
+                            </button>
+                        </form>
 
-<thead>
+                    </div>
+                </td>
 
-<tr>
-    <th>ID</th>
-    <th>Student Name</th>
-    <th>Roll No</th>
-    <th>Class</th>
-    <th>Monthly Fee</th>
-    <th>Actions</th>
-</tr>
+            </tr>
 
-</thead>
+            {% endfor %}
 
-<tbody>
+            <tr id="noResults">
+                <td colspan="6" class="no-results">
+                    😕 No student found matching your search.
+                </td>
+            </tr>
 
-{% for student in students %}
+            </tbody>
 
-<tr class="student-row">
+        </table>
 
-<td>
-    {{ student.display_id or student.id }}
-</td>
-
-<td>
-    {{ student.student_name }}
-</td>
-
-<td class="roll-number">
-    {{ student.roll_no }}
-</td>
-
-<td>
-    {{ student.class_name }}
-</td>
-
-<td>
-    Rs. {{ student.monthly_fee }}
-</td>
-
-<td>
-
-<div class="actions">
-
-<a
-href="/students/update/{{ student.id }}"
-class="button update"
->
-
-    Update
-
-</a>
-
-<form
-    action="/students/delete/{{ student.id }}"
-    method="POST"
->
-
-<button
-type="submit"
-class="delete-button"
-onclick="return confirm('Delete this student?')"
->
-
-    Delete
-
-</button>
-
-</form>
-
-</div>
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-<tr id="noResults">
-
-<td colspan="6" class="no-results">
-    No student found with this Roll No.
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
+    </div>
 
 </div>
 
 
 <script>
 
-/* ==========================================================
-   SEARCH STUDENTS BY ROLL NUMBER
-   ========================================================== */
+const searchInput    = document.getElementById("studentSearch");
+const studentRows    = document.querySelectorAll(".student-row");
+const studentCount   = document.getElementById("studentCount");
+const noResults      = document.getElementById("noResults");
 
-const searchInput = document.getElementById("studentSearch");
+searchInput.addEventListener("input", function () {
 
-const studentRows = document.querySelectorAll(".student-row");
+    const searchValue = this.value.trim().toLowerCase();
+    let visible = 0;
 
-const studentCount = document.getElementById("studentCount");
+    studentRows.forEach(function (row) {
 
-const noResults = document.getElementById("noResults");
+        const text = row.textContent.toLowerCase();
 
-
-searchInput.addEventListener("input", function() {
-
-    const searchValue = this.value
-        .trim()
-        .toLowerCase();
-
-    let visibleStudents = 0;
-
-    studentRows.forEach(function(row) {
-
-        const rollNumberCell =
-            row.querySelector(".roll-number");
-
-        const rollNumber =
-            rollNumberCell
-                ? rollNumberCell.textContent
-                    .trim()
-                    .toLowerCase()
-                : "";
-
-        if (
-            searchValue === ""
-            || rollNumber.includes(searchValue)
-        ) {
-
+        if (searchValue === "" || text.includes(searchValue)) {
             row.style.display = "";
-
-            visibleStudents++;
-
+            visible++;
         } else {
-
             row.style.display = "none";
-
         }
 
     });
 
+    studentCount.textContent = "👨‍🎓 Total Students: " + visible;
 
-    /* Update student count */
-
-    studentCount.textContent =
-        "Total Students: " + visibleStudents;
-
-
-    /* Show/hide no results message */
-
-    if (
-        visibleStudents === 0
-        && searchValue !== ""
-    ) {
-
-        noResults.style.display = "table-row";
-
-    } else {
-
-        noResults.style.display = "none";
-
-    }
+    noResults.style.display =
+        (visible === 0 && searchValue !== "")
+            ? "table-row"
+            : "none";
 
 });
 
 
-/* ==========================================================
-   DELETE ALL CONFIRMATION
-   ========================================================== */
-
 function confirmDeleteAll() {
 
-    const totalStudents =
-        {{ students|length }};
+    const total = {{ students|length }};
 
-    if (totalStudents === 0) {
-
+    if (total === 0) {
         alert("There are no students to delete.");
-
         return false;
-
     }
 
     return confirm(
-        "WARNING!\n\n" +
-        "You are about to delete ALL " +
-        totalStudents +
-        " students.\n\n" +
-        "Their associated fee payment records will also be deleted.\n\n" +
+        "⚠️ WARNING!\n\n" +
+        "You are about to delete ALL " + total + " students.\n\n" +
+        "Their fee payment records will also be deleted.\n\n" +
         "This action cannot be undone.\n\n" +
         "Are you sure you want to continue?"
     );
@@ -572,6 +446,4 @@ function confirmDeleteAll() {
 </script>
 
 </body>
-
 </html>
-

@@ -1,200 +1,220 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IESC — Staff Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<meta charset="UTF-8">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #dbeafe 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 15px;
+        }
 
-<title>IESC Student Portal/Fee Management System</title>
+        .logout-button {
+            position: fixed;
+            top: 18px;
+            right: 22px;
+            background: #dc2626;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(220,38,38,0.30);
+            transition: all 0.2s;
+            z-index: 1000;
+        }
 
-<style>
+        .logout-button:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
 
-    * {
-        box-sizing: border-box;
-    }
+        .container {
+            width: 420px;
+            max-width: 100%;
+            background: white;
+            padding: 38px 36px 32px;
+            border-radius: 22px;
+            box-shadow: 0 12px 40px rgba(30,58,138,0.14);
+            text-align: center;
+        }
 
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
-        min-height: 100vh;
+        .logo {
+            width: 130px;
+            height: 110px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 10px;
+        }
 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+        .school-name {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1e3a8a;
+            letter-spacing: -0.4px;
+            margin-bottom: 4px;
+        }
 
-    /* =====================================================
-       LOGOUT BUTTON
-       ===================================================== */
+        .subtitle {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 14px;
+        }
 
-    .logout-button {
-        position: fixed;
-        top: 20px;
-        right: 25px;
+        .user-badge {
+            display: inline-block;
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #bfdbfe;
+            margin-bottom: 26px;
+        }
 
-        background: #dc2626;
-        color: white;
+        .menu-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
 
-        padding: 10px 16px;
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-        border-radius: 8px;
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            text-decoration: none;
+            background: #1e3a8a;
+            color: white;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: left;
+        }
 
-        text-decoration: none;
+        .menu a:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29,78,216,0.28);
+        }
 
-        font-size: 13px;
-        font-weight: bold;
+        .menu a .icon {
+            font-size: 18px;
+            width: 28px;
+            text-align: center;
+            flex-shrink: 0;
+        }
 
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        .menu a.green { background: #16a34a; }
+        .menu a.green:hover { background: #15803d; box-shadow: 0 6px 20px rgba(21,128,61,0.28); }
 
-        transition: 0.25s;
-    }
+        .menu a.amber { background: #d97706; }
+        .menu a.amber:hover { background: #b45309; box-shadow: 0 6px 20px rgba(180,83,9,0.28); }
 
-    .logout-button:hover {
-        background: #b91c1c;
-        transform: translateY(-2px);
-    }
+        .menu a.rose  { background: #e11d48; }
+        .menu a.rose:hover  { background: #be123c; box-shadow: 0 6px 20px rgba(190,18,60,0.28); }
 
+        .menu a.sky   { background: #0284c7; }
+        .menu a.sky:hover   { background: #0369a1; box-shadow: 0 6px 20px rgba(3,105,161,0.28); }
 
-    .container {
-        width: 420px;
-        background: white;
-        padding: 40px;
-        border-radius: 18px;
+        .footer {
+            margin-top: 22px;
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
 
-        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+        .total-students {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
 
-        text-align: center;
-    }
+        @media (max-width: 460px) {
+            .container { padding: 28px 20px 24px; }
+        }
 
-    .logo {
-        width: 200px;
-        height: 160px;
-        object-fit: contain;
-        margin-bottom: 0;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    h1 {
-        margin: -5px 0 5px 0;
-        color: #172554;
-        font-size: 28px;
-    }
-
-    .subtitle {
-        color: #666;
-        margin-bottom: 35px;
-        font-size: 15px;
-    }
-
-    .menu {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .menu a {
-        display: block;
-
-        padding: 17px;
-
-        text-decoration: none;
-
-        background: #172554;
-        color: white;
-
-        border-radius: 10px;
-
-        font-size: 17px;
-        font-weight: bold;
-
-        transition: 0.25s;
-    }
-
-    .menu a:hover {
-        background: #2563eb;
-        transform: translateY(-2px);
-    }
-
-    .student-count {
-        display: block;
-        margin-top: 5px;
-        font-size: 13px;
-        font-weight: normal;
-        color: #dbeafe;
-    }
-
-    .footer {
-        margin-top: 30px;
-        font-size: 12px;
-        color: #888;
-    }
-
-</style>
-
+    </style>
 </head>
 
 <body>
 
-
-<!-- =====================================================
-     STAFF LOGOUT
-     ===================================================== -->
-
-<a
-    href="{{ url_for('staff_logout') }}"
-    class="logout-button"
-    onclick="return confirm('Are you sure you want to logout?');"
->
-    Logout
+<a href="{{ url_for('staff_logout') }}" class="logout-button"
+   onclick="return confirm('Are you sure you want to logout?');">
+    🚪 Logout
 </a>
-
 
 <div class="container">
 
-    <img
-        src="{{ url_for('static', filename='logo.png') }}"
-        alt="Irshad Educational Academy Logo"
-        class="logo"
-    >
+    <img src="{{ url_for('static', filename='logo.png') }}"
+         alt="IESC Logo" class="logo">
 
-    <div class="subtitle">
-        {{ current_school_name }} — Staff Portal
-    </div>
+    <div class="school-name">{{ current_school_name }}</div>
+    <div class="subtitle">Staff Portal — Fee Management System</div>
 
-    <div style="margin-bottom: 20px; display: inline-block; background: #e0f2fe; color: #0369a1; padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;">
-        👤 Logged in as: {{ current_username }}
-    </div>
-
+    <div class="user-badge">👤 Logged in as: {{ current_username }}</div>
 
     <div class="menu">
 
         <a href="/generate-challan">
+            <span class="icon">🖨️</span>
             Generate Challan
         </a>
 
-        <a href="/students/add">
-            Add Student
-        </a>
-
-        <a href="/students">
-            Student's Information
-        </a>
-
-        <a href="/teachers">
-            Teachers Information
-        </a>
-
-        <a href="/fee-payments">
+        <a href="/fee-payments" class="amber">
+            <span class="icon">💳</span>
             Fee Payments
         </a>
 
-        <a href="/expenses">
+        <a href="/students">
+            <span class="icon">👨‍🎓</span>
+            Student's Information
+        </a>
+
+        <a href="/students/add" class="green">
+            <span class="icon">➕</span>
+            Add New Student
+        </a>
+
+        <a href="/teachers" class="sky">
+            <span class="icon">👩‍🏫</span>
+            Teachers Information
+        </a>
+
+        <a href="/expenses" class="rose">
+            <span class="icon">💸</span>
             School Expenses
         </a>
 
@@ -202,18 +222,12 @@
 
     <div class="footer">
         Irshad Educational Academy
+        <br>Academic Session 2026–2027
         <br>
-        Academic Session 2026–2027
-        <br>
-        <span class="student-count">
-            Total Students: {{ total_students }}
-        </span>
+        <span class="total-students">👨‍🎓 Total Students: {{ total_students }}</span>
     </div>
 
 </div>
 
-
 </body>
-
 </html>
-

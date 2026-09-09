@@ -5,51 +5,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teachers Information | IESC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
+            font-family: 'Inter', Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #dbeafe 100%);
             min-height: 100vh;
-            padding: 35px 20px;
+            padding: 30px 15px 50px;
+            color: #1e293b;
         }
 
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1250px;
             margin: auto;
             background: white;
-            padding: 35px;
+            padding: 30px;
             border-radius: 18px;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 30px rgba(30,58,138,0.10);
+            border: 1px solid rgba(30,58,138,0.06);
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 26px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
         }
 
         .logo {
-            width: 150px;
-            height: 95px;
+            width: 110px;
+            height: 70px;
             object-fit: contain;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e3a8a;
+            letter-spacing: -0.4px;
+            margin-bottom: 3px;
         }
 
         .subtitle {
-            color: #666;
-            font-size: 14px;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .top-buttons {
@@ -59,147 +74,161 @@
             align-items: center;
         }
 
-        .button {
-            padding: 12px 18px;
-            border-radius: 9px;
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 11px 18px;
+            border-radius: 10px;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
             border: none;
             cursor: pointer;
-            display: inline-block;
-            font-size: 14px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
 
-        .home {
-            background: #e0e7ff;
-            color: #172554;
-        }
+        .btn:hover { transform: translateY(-1px); }
 
-        .add {
-            background: #172554;
-            color: white;
-        }
+        .btn-home  { background: #e0e7ff; color: #1e3a8a; }
+        .btn-home:hover  { background: #c7d2fe; }
 
-        .print-btn {
-            background: #16a34a;
-            color: white;
-        }
+        .btn-add   { background: #1e3a8a; color: white; }
+        .btn-add:hover   { background: #1d4ed8; box-shadow: 0 4px 14px rgba(29,78,216,0.28); }
 
-        .print-btn:hover {
-            background: #15803d;
-        }
+        .btn-print { background: #16a34a; color: white; }
+        .btn-print:hover { background: #15803d; box-shadow: 0 4px 14px rgba(21,128,61,0.28); }
 
         .teacher-count {
-            padding: 12px 18px;
-            border-radius: 9px;
-            background: #e0e7ff;
-            color: #172554;
-            font-weight: bold;
-            display: inline-block;
+            padding: 11px 18px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 700;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #bfdbfe;
         }
 
-        .table-box {
-            overflow-x: auto;
-        }
+        .table-box { overflow-x: auto; }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            min-width: 780px;
         }
 
-        th {
-            background: #172554;
+        thead th {
+            background: #1e3a8a;
             color: white;
-            padding: 14px;
+            padding: 13px 14px;
             text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
-        td {
-            padding: 13px;
-            border-bottom: 1px solid #ddd;
+        thead th:first-child { border-radius: 8px 0 0 0; }
+        thead th:last-child  { border-radius: 0 8px 0 0; }
+
+        tbody td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+            color: #334155;
         }
 
-        tr:hover {
-            background: #f8fafc;
+        tbody tr:hover { background: #f8fafc; }
+        tbody tr:last-child td { border-bottom: none; }
+
+        .salary-chip {
+            display: inline-block;
+            background: #f0fdf4;
+            color: #15803d;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid #bbf7d0;
         }
 
-        .actions {
+        .class-chip {
+            display: inline-block;
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid #bfdbfe;
+        }
+
+        .action-cell {
             display: flex;
             gap: 7px;
             flex-wrap: wrap;
         }
 
-        .update {
+        .btn-update {
             background: #2563eb;
             color: white;
+            padding: 7px 13px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background 0.2s;
         }
+        .btn-update:hover { background: #1d4ed8; }
 
-        .delete-button {
-            padding: 10px 14px;
-            border-radius: 7px;
-            border: none;
-            color: white;
+        .btn-del {
             background: #dc2626;
-            font-weight: bold;
+            color: white;
+            border: none;
+            padding: 7px 13px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
         }
-
-        .update:hover {
-            background: #1d4ed8;
-        }
-
-        .delete-button:hover {
-            background: #b91c1c;
-        }
+        .btn-del:hover { background: #b91c1c; }
 
         .no-records {
             text-align: center;
-            padding: 40px;
-            color: #777;
-            font-size: 14px;
+            padding: 60px 20px;
+            color: #64748b;
         }
 
+        .no-records h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .no-records p { font-size: 14px; }
+        .no-records .empty-icon { font-size: 48px; margin-bottom: 14px; }
+
         @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
-
-            .container {
-                box-shadow: none;
-                padding: 0;
-                max-width: 100%;
-            }
-
-            .top-buttons, .actions, th:last-child, td:last-child {
-                display: none !important;
-            }
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .top-buttons, .action-cell, thead th:last-child, tbody td:last-child { display: none !important; }
         }
 
         @media (max-width: 650px) {
-            body {
-                padding: 20px 12px;
-            }
-
-            .container {
-                padding: 25px 18px;
-            }
-
-            .top {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-            }
-
-            .top-buttons {
-                flex-direction: column;
-            }
-
-            .top-buttons .button, .teacher-count {
-                text-align: center;
-                width: 100%;
-            }
+            body { padding: 20px 10px 40px; }
+            .container { padding: 22px 16px; }
+            .top { flex-direction: column; align-items: stretch; }
+            .top-buttons { flex-direction: column; }
+            .top-buttons .btn, .teacher-count { text-align: center; width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -211,31 +240,35 @@
         <div class="header">
             <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="IESC Logo">
             <h1>Teachers Information</h1>
-            <div class="subtitle">Irshad Educational Academy — Faculty Roster</div>
+            <div class="subtitle">IESC — Faculty Roster</div>
         </div>
 
         <div class="top">
             <div class="top-buttons">
-                <a href="{% if session.get('admin_logged_in') %}/admin{% else %}/staff{% endif %}" class="button home">
-                    Dashboard
+
+                <a href="{% if session.get('admin_logged_in') %}/admin{% else %}/staff{% endif %}" class="btn btn-home">
+                    🏠 Dashboard
                 </a>
 
-                <a href="/teachers/add" class="button add">
-                    Add Teacher
+                <a href="/teachers/add" class="btn btn-add">
+                    ➕ Add Teacher
                 </a>
 
-                <button onclick="window.print()" class="button print-btn">
-                    Print Faculty Roster
+                <button onclick="window.print()" class="btn btn-print">
+                    🖨️ Print Roster
                 </button>
 
-                <div class="teacher-count">
-                    Total Teachers: {{ teachers|length }}
-                </div>
+            </div>
+
+            <div class="teacher-count">
+                👩‍🏫 Total Teachers: {{ teachers|length }}
             </div>
         </div>
 
         <div class="table-box">
+
             {% if teachers %}
+
             <table>
                 <thead>
                     <tr>
@@ -243,7 +276,7 @@
                         <th>Teacher Name</th>
                         <th>Contact Number</th>
                         <th>Allotted Class</th>
-                        <th>Allotted Subjects</th>
+                        <th>Subjects</th>
                         <th>Monthly Salary</th>
                         <th>Actions</th>
                     </tr>
@@ -254,30 +287,43 @@
                         <td>{{ teacher.display_id }}</td>
                         <td><strong>{{ teacher.teacher_name }}</strong></td>
                         <td>{{ teacher.phone }}</td>
-                        <td>Class {{ teacher.allotted_class }}</td>
+                        <td><span class="class-chip">Class {{ teacher.allotted_class }}</span></td>
                         <td>{{ teacher.allotted_subjects }}</td>
-                        <td>Rs. {{ "%.2f"|format(teacher.salary or 0) }}</td>
+                        <td><span class="salary-chip">Rs. {{ "%.2f"|format(teacher.salary or 0) }}</span></td>
                         <td>
-                            <div class="actions">
-                                <a href="/teachers/update/{{ teacher.id }}" class="button update">Update</a>
+                            <div class="action-cell">
+
+                                <a href="/teachers/update/{{ teacher.id }}" class="btn-update">
+                                    ✏️ Update
+                                </a>
 
                                 <form action="/teachers/delete/{{ teacher.id }}" method="POST" style="display:inline;">
-                                    <button type="submit" class="delete-button" onclick="return confirm('Delete this teacher record?')">
-                                        Delete
+                                    <button
+                                        type="submit"
+                                        class="btn-del"
+                                        onclick="return confirm('Delete this teacher record?')"
+                                    >
+                                        🗑 Delete
                                     </button>
                                 </form>
+
                             </div>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
             {% else %}
+
             <div class="no-records">
+                <div class="empty-icon">👩‍🏫</div>
                 <h3>No Teachers Added Yet</h3>
                 <p>Click "Add Teacher" above to register faculty members.</p>
             </div>
+
             {% endif %}
+
         </div>
 
     </div>

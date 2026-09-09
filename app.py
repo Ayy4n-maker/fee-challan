@@ -68,15 +68,6 @@ def doc_to_dict(doc, default_index=1):
 
 # ==========================================================
 # HELPER — CLASS SORTING
-#
-# Order:
-# Playgroup
-# Prep 1
-# Prep 2
-# Class 1
-# Class 2
-# ...
-# Class 10
 # ==========================================================
 
 def class_sort_order(class_name):
@@ -1471,13 +1462,6 @@ def delete_student(student_id):
 
 # ==========================================================
 # DELETE ALL STUDENTS
-#
-# Deletes:
-# 1. All students in current portfolio
-# 2. Their associated fee payment records
-#
-# IMPORTANT:
-# This only affects the currently logged-in portfolio.
 # ==========================================================
 
 @app.route(
@@ -2499,6 +2483,159 @@ def mark_paid(payment_id):
 
 
 # ==========================================================
+# MARK ALL VISIBLE PAYMENTS AS PAID
+# ==========================================================
+
+@app.route(
+    "/fee-payments/mark-all-paid",
+    methods=["POST"]
+)
+@login_required
+def mark_all_paid():
+
+    db = get_firestore_db()
+
+    status_filter = request.form.get(
+        "status_filter",
+        "ALL"
+    ).upper().strip()
+
+    student_id_filter = request.form.get(
+        "student_id_filter",
+        ""
+    ).strip()
+
+    valid_statuses = [
+        "ALL",
+        "PAID",
+        "UNPAID",
+        "OVERDUE"
+    ]
+
+    if status_filter not in valid_statuses:
+
+        status_filter = "ALL"
+
+    # ------------------------------------------------------
+    # Get payment records
+    # ------------------------------------------------------
+
+    if student_id_filter:
+
+        payment_docs = (
+            db.collection(
+                "fee_payments"
+            )
+            .where(
+                "student_id",
+                "==",
+                student_id_filter
+            )
+            .get()
+        )
+
+        payment_docs = [
+            doc for doc in payment_docs
+            if is_doc_in_portfolio(
+                doc.to_dict()
+            )
+        ]
+
+    else:
+
+        payment_docs = get_portfolio_docs(
+            "fee_payments"
+        )
+
+    today = date.today()
+
+    # ------------------------------------------------------
+    # Mark matching unpaid / overdue records as PAID
+    # ------------------------------------------------------
+
+    for payment_doc in payment_docs:
+
+        payment = payment_doc.to_dict() or {}
+
+        if not is_doc_in_portfolio(payment):
+            continue
+
+        current_status = payment.get(
+            "status",
+            "UNPAID"
+        )
+
+        # Already paid — leave unchanged
+        if current_status == "PAID":
+            continue
+
+        # Determine actual current status
+        display_status = "UNPAID"
+
+        try:
+
+            due_date_value = payment.get(
+                "due_date"
+            )
+
+            if due_date_value:
+
+                due_date = date.fromisoformat(
+                    due_date_value
+                )
+
+                if today > due_date:
+
+                    display_status = "OVERDUE"
+
+        except (
+            ValueError,
+            TypeError
+        ):
+
+            display_status = "UNPAID"
+
+        # --------------------------------------------------
+        # Respect selected filter
+        # --------------------------------------------------
+
+        if status_filter != "ALL":
+
+            if display_status != status_filter:
+                continue
+
+        # --------------------------------------------------
+        # Mark payment as paid
+        # --------------------------------------------------
+
+        total_payable = float(
+            payment.get(
+                "total_payable"
+            ) or 0
+        )
+
+        payment_doc.reference.update({
+
+            "status": "PAID",
+
+            "payment_date":
+                today.isoformat(),
+
+            "amount_received":
+                total_payable,
+
+        })
+
+    return redirect(
+        url_for(
+            "fee_payments",
+            status=status_filter,
+            student_id=student_id_filter
+        )
+    )
+
+
+# ==========================================================
 # MARK AS UNPAID
 # ==========================================================
 
@@ -2588,20 +2725,19 @@ def delete_fee_payment(payment_id):
             "fee_payments"
         )
     )
+
+
 # ==========================================================
-# DELETE All FEE RECORD
+# DELETE ALL FEE RECORDS
 # ==========================================================
+
 @app.route(
-"/fee-payments/delete-all",
-methods=["POST"]
+    "/fee-payments/delete-all",
+    methods=["POST"]
 )
 @login_required
 def delete_all_fee_payments():
 
-    db = get_firestore_db()
-
-    # Get only fee payment records
-    # belonging to the currently logged-in portfolio
     payment_docs = get_portfolio_docs(
         "fee_payments"
     )
@@ -2611,8 +2747,11 @@ def delete_all_fee_payments():
         payment_doc.reference.delete()
 
     return redirect(
-        url_for("fee_payments")
+        url_for(
+            "fee_payments"
+        )
     )
+
 
 # ==========================================================
 # TEACHERS MANAGEMENT

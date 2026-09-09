@@ -2,25 +2,21 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Admin Dashboard | IESC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa, #e4e8ef);
+            font-family: 'Inter', Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #dbeafe 100%);
             min-height: 100vh;
-            padding: 30px 15px;
+            padding: 30px 15px 50px;
+            color: #1e293b;
         }
 
         /* =====================================================
@@ -29,341 +25,522 @@
 
         .logout-button {
             position: fixed;
-            top: 20px;
-            right: 25px;
-
+            top: 18px;
+            right: 22px;
             background: #dc2626;
             color: white;
-
-            padding: 10px 16px;
-
+            padding: 9px 18px;
             border-radius: 8px;
-
             text-decoration: none;
-
             font-size: 13px;
-            font-weight: bold;
-
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-            transition: 0.25s;
-
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(220,38,38,0.30);
+            transition: all 0.2s;
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .logout-button:hover {
             background: #b91c1c;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(220,38,38,0.35);
         }
 
+        /* =====================================================
+           CONTAINER
+           ===================================================== */
 
         .container {
-            max-width: 1100px;
+            max-width: 1180px;
             margin: auto;
         }
 
-        .header {
+        /* =====================================================
+           HEADER CARD
+           ===================================================== */
+
+        .header-card {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
+            padding: 28px 32px;
+            border-radius: 18px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.10);
-            margin-bottom: 25px;
+            box-shadow: 0 8px 30px rgba(30,58,138,0.10);
+            margin-bottom: 22px;
+            border: 1px solid rgba(30,58,138,0.06);
         }
 
         .logo {
-            width: 130px;
-            height: 80px;
+            width: 120px;
+            height: 75px;
             object-fit: contain;
-        }
-
-        h1 {
-            margin: 5px 0;
-            color: #172554;
-            font-size: 26px;
-        }
-
-        .subtitle {
-            color: #777;
-            font-size: 13px;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-        }
-
-        .card {
-            background: white;
-            padding: 22px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-        }
-
-        .card-title {
-            color: #777;
-            font-size: 12px;
             margin-bottom: 10px;
         }
 
-        .card-value {
-            color: #172554;
-            font-size: 24px;
-            font-weight: bold;
+        .school-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1e3a8a;
+            letter-spacing: -0.5px;
         }
 
-        .money {
-            color: #15803d;
+        .school-subtitle {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 4px;
+            font-weight: 500;
         }
 
-        .actions {
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 7px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #bfdbfe;
+            margin-top: 12px;
+        }
+
+        /* =====================================================
+           STATS GRID
+           ===================================================== */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .stat-card {
             background: white;
-            margin-top: 25px;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            text-decoration: none;
+            border: 1px solid #f1f5f9;
+            transition: all 0.2s;
+            display: block;
         }
 
-        .actions h2 {
-            margin-top: 0;
-            color: #172554;
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(30,58,138,0.12);
+            border-color: #c7d2fe;
+        }
+
+        .stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 18px;
+            margin-bottom: 12px;
         }
 
-        .buttons {
+        .stat-label {
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            color: #1e293b;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-value.green  { color: #15803d; }
+        .stat-value.red    { color: #dc2626; }
+        .stat-value.amber  { color: #d97706; }
+        .stat-value.blue   { color: #1d4ed8; }
+
+        /* =====================================================
+           FINANCIAL SUMMARY
+           ===================================================== */
+
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 28px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            border: 1px solid #f1f5f9;
+            margin-bottom: 22px;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+        }
+
+        .fin-item {
+            padding: 16px 18px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border-left: 4px solid #cbd5e1;
+        }
+
+        .fin-item.income  { border-left-color: #16a34a; background: #f0fdf4; }
+        .fin-item.expense { border-left-color: #dc2626; background: #fff5f5; }
+        .fin-item.profit  { border-left-color: #1d4ed8; background: #eff6ff; }
+        .fin-item.loss    { border-left-color: #d97706; background: #fffbeb; }
+
+        .fin-label {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 6px;
+        }
+
+        .fin-value {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .fin-item.income  .fin-value { color: #15803d; }
+        .fin-item.expense .fin-value { color: #b91c1c; }
+        .fin-item.profit  .fin-value { color: #1d4ed8; }
+        .fin-item.loss    .fin-value { color: #b45309; }
+
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-red   { background: #fee2e2; color: #991b1b; }
+
+        /* =====================================================
+           STAFF ACCESS CARD
+           ===================================================== */
+
+        .staff-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 28px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            border: 1px solid #f1f5f9;
+            margin-bottom: 22px;
+        }
+
+        .staff-card p {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 16px;
+            margin-top: 2px;
+        }
+
+        .staff-form {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 13px;
+            border-radius: 9px;
+            border: 1.5px solid #e2e8f0;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: #f8fafc;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
+        }
+
+        .save-btn {
+            background: #1d4ed8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .save-btn:hover { background: #1e40af; }
+
+        /* =====================================================
+           MANAGEMENT OPTIONS
+           ===================================================== */
+
+        .actions-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 28px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            border: 1px solid #f1f5f9;
+        }
+
+        /* ---- Groups ---- */
+        .btn-group {
+            margin-bottom: 20px;
+        }
+
+        .btn-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .group-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .btn-row {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
 
-        .button {
-            display: inline-block;
-            padding: 11px 16px;
-            background: #172554;
-            color: white;
-            text-decoration: none;
-            border-radius: 7px;
+        /* ---- Buttons ---- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 11px 18px;
+            border-radius: 10px;
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
 
-        .button:hover {
-            background: #2563eb;
-        }
+        .btn:hover { transform: translateY(-1px); }
 
-        .back {
-            background: #64748b;
-        }
+        .btn-navy    { background: #1e3a8a; color: white; }
+        .btn-navy:hover { background: #1e40af; }
 
-        @media (max-width: 800px) {
+        .btn-blue    { background: #2563eb; color: white; }
+        .btn-blue:hover { background: #1d4ed8; }
 
-            .cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .btn-green   { background: #16a34a; color: white; }
+        .btn-green:hover { background: #15803d; }
 
+        .btn-amber   { background: #d97706; color: white; }
+        .btn-amber:hover { background: #b45309; }
+
+        .btn-red-fee { background: #dc2626; color: white; }
+        .btn-red-fee:hover { background: #b91c1c; }
+
+        .btn-sky     { background: #0284c7; color: white; }
+        .btn-sky:hover { background: #0369a1; }
+
+        .btn-rose    { background: #e11d48; color: white; }
+        .btn-rose:hover { background: #be123c; }
+
+        .btn-slate   { background: #475569; color: white; }
+        .btn-slate:hover { background: #334155; }
+
+        .btn-teal    { background: #059669; color: white; }
+        .btn-teal:hover { background: #047857; }
+
+        .btn-light   { background: #e0e7ff; color: #1e3a8a; }
+        .btn-light:hover { background: #c7d2fe; }
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 500px) {
-
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .logout-button {
-                top: 12px;
-                right: 12px;
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-
+            .stats-grid { grid-template-columns: 1fr; }
+            .logout-button { top: 12px; right: 12px; padding: 8px 13px; font-size: 12px; }
+            body { padding: 20px 10px 40px; }
         }
 
     </style>
-
 </head>
 
 <body>
 
-
 <!-- =====================================================
-     ADMIN LOGOUT
+     LOGOUT
      ===================================================== -->
 
-<a
-    href="{{ url_for('admin_logout') }}"
-    class="logout-button"
-    onclick="return confirm('Are you sure you want to logout?');"
->
-    Logout
+<a href="{{ url_for('admin_logout') }}" class="logout-button"
+   onclick="return confirm('Are you sure you want to logout?');">
+    🚪 Logout
 </a>
 
 
 <div class="container">
 
-    <div class="header">
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
 
-        <img
-            src="{{ url_for('static', filename='logo.png') }}"
-            class="logo"
-            alt="IESC Logo"
-        >
+    <div class="header-card">
 
-        <h1>Admin Dashboard</h1>
+        <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="IESC Logo">
 
-        <div class="subtitle">
-            IESC Fee Management System
-        </div>
+        <div class="school-title">Admin Dashboard</div>
+        <div class="school-subtitle">IESC — Fee Management System</div>
 
-        <div style="margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; background: #e0f2fe; color: #0369a1; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid #bae6fd;">
-            <span>👤 Admin: <strong>{{ current_username }}</strong></span>
-            <span>•</span>
-            <span>🏫 {{ current_school_name }}</span>
+        <div class="user-badge">
+            👤 Admin: <strong>{{ current_username }}</strong>
+            &nbsp;•&nbsp;
+            🏫 {{ current_school_name }}
         </div>
 
     </div>
 
 
-    <div class="cards">
+    <!-- =====================================================
+         STATS CARDS
+         ===================================================== -->
 
-        <a href="/students" class="card" style="text-decoration: none;">
+    <div class="stats-grid">
 
-            <div class="card-title">
-                TOTAL STUDENTS
-            </div>
-
-            <div class="card-value">
-                {{ total_students }}
-            </div>
-
+        <a href="/students" class="stat-card">
+            <div class="stat-icon" style="background:#eff6ff;">👨‍🎓</div>
+            <div class="stat-label">Total Students</div>
+            <div class="stat-value blue">{{ total_students }}</div>
         </a>
 
-
-        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
-
-            <div class="card-title">
-                TOTAL MONEY RECEIVED
-            </div>
-
-            <div class="card-value money">
-                Rs. {{ "%.2f"|format(total_received) }}
-            </div>
-
+        <a href="/fee-payments?status=PAID" class="stat-card">
+            <div class="stat-icon" style="background:#f0fdf4;">💰</div>
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value green">Rs. {{ "%.0f"|format(total_received) }}</div>
         </a>
 
-
-        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
-
-            <div class="card-title">
-                PAID PAYMENTS
-            </div>
-
-            <div class="card-value">
-                {{ total_paid }}
-            </div>
-
+        <a href="/fee-payments?status=PAID" class="stat-card">
+            <div class="stat-icon" style="background:#f0fdf4;">✅</div>
+            <div class="stat-label">Paid Payments</div>
+            <div class="stat-value green">{{ total_paid }}</div>
         </a>
 
-
-        <a href="/fee-payments?status=UNPAID" class="card" style="text-decoration: none;">
-
-            <div class="card-title">
-                UNPAID PAYMENTS
-            </div>
-
-            <div class="card-value">
-                {{ total_unpaid }}
-            </div>
-
+        <a href="/fee-payments?status=UNPAID" class="stat-card">
+            <div class="stat-icon" style="background:#fffbeb;">⏳</div>
+            <div class="stat-label">Unpaid Payments</div>
+            <div class="stat-value amber">{{ total_unpaid }}</div>
         </a>
 
-
-        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
-
-            <div class="card-title">
-                LATE FEES RECEIVED
-            </div>
-
-            <div class="card-value money">
-                Rs. {{ "%.2f"|format(total_late_fee) }}
-            </div>
-
+        <a href="/fee-payments?status=PAID" class="stat-card">
+            <div class="stat-icon" style="background:#fff1f2;">🕐</div>
+            <div class="stat-label">Late Fees Collected</div>
+            <div class="stat-value red">Rs. {{ "%.0f"|format(total_late_fee) }}</div>
         </a>
 
-
-        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
-
-            <div class="card-title">
-                ANNUAL FEES RECEIVED
-            </div>
-
-            <div class="card-value money">
-                Rs. {{ "%.2f"|format(total_annual_fee) }}
-            </div>
-
+        <a href="/fee-payments?status=PAID" class="stat-card">
+            <div class="stat-icon" style="background:#f0fdf4;">📅</div>
+            <div class="stat-label">Annual Fees Collected</div>
+            <div class="stat-value green">Rs. {{ "%.0f"|format(total_annual_fee) }}</div>
         </a>
 
-
-        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
-
-            <div class="card-title">
-                STATIONERY / EXAM FEES
-            </div>
-
-            <div class="card-value money">
-                Rs. {{ "%.2f"|format(total_stationery_fee) }}
-            </div>
-
+        <a href="/fee-payments?status=PAID" class="stat-card">
+            <div class="stat-icon" style="background:#eff6ff;">📚</div>
+            <div class="stat-label">Stationery / Exam Fees</div>
+            <div class="stat-value blue">Rs. {{ "%.0f"|format(total_stationery_fee) }}</div>
         </a>
 
-
-        <a href="/fee-payments?status=PAID" class="card" style="text-decoration: none;">
-
-            <div class="card-title">
-                TOTAL DISCOUNTS GIVEN
-            </div>
-
-            <div class="card-value" style="color: #dc2626; font-weight: bold; font-size: 24px;">
-                Rs. {{ "%.2f"|format(total_discount) }}
-            </div>
-
+        <a href="/fee-payments?status=PAID" class="stat-card">
+            <div class="stat-icon" style="background:#fff5f5;">🎟️</div>
+            <div class="stat-label">Total Discounts Given</div>
+            <div class="stat-value red">Rs. {{ "%.0f"|format(total_discount) }}</div>
         </a>
 
     </div>
 
 
     <!-- =====================================================
-         PROFIT / LOSS FINANCIAL SUMMARY
-    ===================================================== -->
-    <div class="actions" style="margin-top: 25px; background: #f8fafc; border: 2px solid #cbd5e1;">
+         FINANCIAL SUMMARY
+         ===================================================== -->
 
-        <h2 style="color: #172554; margin-top: 0; font-size: 20px; text-align: center;">
-            🏫 School Financial Summary & Net Profit / Loss
-        </h2>
+    <div class="summary-card">
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;">
+        <div class="section-title">🏦 School Financial Summary</div>
 
-            <div style="background: white; padding: 18px; border-radius: 10px; border-left: 5px solid #16a34a; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                <div style="font-size: 12px; color: #64748b; font-weight: bold; margin-bottom: 5px;">TOTAL MONEY RECEIVED (REVENUE)</div>
-                <div style="font-size: 22px; color: #15803d; font-weight: bold;">Rs. {{ "%.2f"|format(total_received) }}</div>
+        <div class="fin-grid">
+
+            <div class="fin-item income">
+                <div class="fin-label">Total Revenue</div>
+                <div class="fin-value">Rs. {{ "%.2f"|format(total_received) }}</div>
             </div>
 
-            <div style="background: white; padding: 18px; border-radius: 10px; border-left: 5px solid #dc2626; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                <div style="font-size: 12px; color: #64748b; font-weight: bold; margin-bottom: 5px;">TOTAL SCHOOL EXPENSES</div>
-                <div style="font-size: 22px; color: #b91c1c; font-weight: bold;">Rs. {{ "%.2f"|format(total_expenses) }}</div>
+            <div class="fin-item expense">
+                <div class="fin-label">Total Expenses</div>
+                <div class="fin-value">Rs. {{ "%.2f"|format(total_expenses) }}</div>
             </div>
 
-            <div style="background: white; padding: 18px; border-radius: 10px; border-left: 5px solid {{ '#16a34a' if net_profit_loss >= 0 else '#dc2626' }}; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                <div style="font-size: 12px; color: #64748b; font-weight: bold; margin-bottom: 5px;">NET STATUS (PROFIT / LOSS)</div>
-                {% if net_profit_loss >= 0 %}
-                <div style="font-size: 22px; color: #15803d; font-weight: bold;">
-                    + Rs. {{ "%.2f"|format(net_profit_loss) }} <span style="font-size: 13px; background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 5px; vertical-align: middle;">PROFIT</span>
+            <div class="fin-item {% if net_profit_loss >= 0 %}profit{% else %}loss{% endif %}">
+                <div class="fin-label">Net Status</div>
+                <div class="fin-value">
+                    {% if net_profit_loss >= 0 %}
+                        + Rs. {{ "%.2f"|format(net_profit_loss) }}
+                        <span class="badge badge-green">PROFIT</span>
+                    {% else %}
+                        - Rs. {{ "%.2f"|format(-net_profit_loss) }}
+                        <span class="badge badge-red">LOSS</span>
+                    {% endif %}
                 </div>
-                {% else %}
-                <div style="font-size: 22px; color: #b91c1c; font-weight: bold;">
-                    - Rs. {{ "%.2f"|format(-net_profit_loss) }} <span style="font-size: 13px; background: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 5px; vertical-align: middle;">LOSS</span>
-                </div>
-                {% endif %}
             </div>
 
         </div>
@@ -372,94 +549,88 @@
 
 
     <!-- =====================================================
-         LINKED STAFF CREDENTIALS FOR THIS PORTFOLIO
-    ===================================================== -->
-    <div class="actions" style="margin-top: 25px; background: #f8fafc; border: 2px solid #cbd5e1; text-align: left; padding: 22px;">
+         STAFF ACCESS
+         ===================================================== -->
 
-        <h3 style="color: #172554; margin-top: 0; font-size: 17px; display: flex; align-items: center; gap: 8px;">
-            🔑 Staff Access Login for this School Portfolio
-        </h3>
+    <div class="staff-card">
 
-        <p style="font-size: 13px; color: #64748b; margin-top: -5px; margin-bottom: 15px;">
-            Your school staff members can log in using these credentials to manage students and print challans for this portfolio.
-        </p>
+        <div class="section-title">🔑 Staff Login Credentials</div>
 
-        <form action="/admin/update-staff" method="POST" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 170px;">
-                <label style="display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 5px;">Staff Username:</label>
-                <input type="text" name="staff_username" value="{{ staff_username }}" required style="width: 100%; padding: 9px 12px; border-radius: 7px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+        <p>Share these credentials with staff members so they can manage students and print challans for this portfolio.</p>
+
+        <form action="/admin/update-staff" method="POST" class="staff-form">
+
+            <div class="form-group">
+                <label class="form-label">Staff Username</label>
+                <input type="text" name="staff_username" value="{{ staff_username }}" required class="form-input">
             </div>
 
-            <div style="flex: 1; min-width: 170px;">
-                <label style="display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 5px;">Staff Password:</label>
-                <input type="text" name="staff_password" value="{{ staff_password }}" required style="width: 100%; padding: 9px 12px; border-radius: 7px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+            <div class="form-group">
+                <label class="form-label">Staff Password</label>
+                <input type="text" name="staff_password" value="{{ staff_password }}" required class="form-input">
             </div>
 
             <div>
-                <button type="submit" style="background: #2563eb; color: white; padding: 10px 18px; border: none; border-radius: 7px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s;">
-                    Save Staff Login
-                </button>
+                <button type="submit" class="save-btn">💾 Save Staff Login</button>
             </div>
+
         </form>
 
     </div>
 
 
-    <div class="actions">
+    <!-- =====================================================
+         MANAGEMENT OPTIONS
+         ===================================================== -->
 
-        <h2>Admin Management Options</h2>
+    <div class="actions-card">
 
-        <div class="buttons">
+        <div class="section-title">⚙️ Admin Management Options</div>
 
-            <a href="/fee-payments" class="button">
-                View All Fee Payments
-            </a>
 
-            <a href="/fee-payments?status=PAID" class="button" style="background:#16a34a;">
-                View Paid Fees
-            </a>
-
-            <a href="/fee-payments?status=UNPAID" class="button" style="background:#d97706;">
-                View Unpaid Fees
-            </a>
-
-            <a href="/fee-payments?status=OVERDUE" class="button" style="background:#dc2626;">
-                View Overdue Fees
-            </a>
-
-            <a href="/students" class="button">
-                View Students List
-            </a>
-
-            <a href="/teachers" class="button" style="background:#0284c7;">
-                View Teachers Info
-            </a>
-
-            <a href="/expenses" class="button" style="background:#e11d48;">
-                View School Expenses
-            </a>
-
-            <a href="/students/add" class="button">
-                Add New Student
-            </a>
-
-            <a href="/generate-challan" class="button">
-                Generate Challans
-            </a>
-
-            <a href="/staff" class="button" style="background:#4b5563;">
-                Staff Portal
-            </a>
-
-            <a href="/register" class="button" style="background:#059669;">
-                + Create New Portfolio
-            </a>
-
-            <a href="/" class="button back">
-                Back to Main Page
-            </a>
-
+        <!-- Fee Payments -->
+        <div class="btn-group">
+            <div class="group-label">📋 Fee Payments</div>
+            <div class="btn-row">
+                <a href="/fee-payments" class="btn btn-navy">📄 All Payments</a>
+                <a href="/fee-payments?status=PAID" class="btn btn-green">✅ Paid Fees</a>
+                <a href="/fee-payments?status=UNPAID" class="btn btn-amber">⏳ Unpaid Fees</a>
+                <a href="/fee-payments?status=OVERDUE" class="btn btn-red-fee">🚨 Overdue Fees</a>
+            </div>
         </div>
+
+
+        <!-- Records -->
+        <div class="btn-group">
+            <div class="group-label">📁 Records</div>
+            <div class="btn-row">
+                <a href="/students" class="btn btn-navy">👨‍🎓 Students List</a>
+                <a href="/teachers" class="btn btn-sky">👩‍🏫 Teachers Info</a>
+                <a href="/expenses" class="btn btn-rose">💸 School Expenses</a>
+            </div>
+        </div>
+
+
+        <!-- Challan Actions -->
+        <div class="btn-group">
+            <div class="group-label">🖨️ Challans</div>
+            <div class="btn-row">
+                <a href="/generate-challan" class="btn btn-blue">🖨️ Generate Challans</a>
+                <a href="/students/add" class="btn btn-navy">➕ Add New Student</a>
+            </div>
+        </div>
+
+
+        <!-- System -->
+        <div class="btn-group">
+            <div class="group-label">🔧 System</div>
+            <div class="btn-row">
+                <a href="/staff" class="btn btn-slate">👔 Staff Portal</a>
+                <a href="/register" class="btn btn-teal">🏫 Create New Portfolio</a>
+                <a href="/" class="btn btn-light">🏠 Main Page</a>
+            </div>
+        </div>
+
 
     </div>
 
@@ -468,4 +639,3 @@
 </body>
 
 </html>
-

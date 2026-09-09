@@ -8,6 +8,9 @@
 
 <title>All Challans | IESC Fee Management System</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
 
 @page {
@@ -21,41 +24,58 @@
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f1f5f9;
+    font-family: 'Inter', Arial, sans-serif;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #dbeafe 100%);
     padding: 25px;
 }
 
 .top-bar {
     max-width: 1100px;
-    margin: 0 auto 20px auto;
+    margin: 0 auto 24px auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: white;
+    padding: 16px 22px;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(30,58,138,0.10);
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .button {
-    padding: 12px 20px;
-    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 20px;
+    border-radius: 9px;
     border: none;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
     font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s;
 }
+
+.button:hover { transform: translateY(-1px); }
 
 .back {
     background: #e0e7ff;
-    color: #172554;
+    color: #1e3a8a;
 }
 
+.back:hover { background: #c7d2fe; }
+
 .print {
-    background: #172554;
+    background: #1e3a8a;
     color: white;
+    box-shadow: 0 4px 14px rgba(30,58,138,0.25);
 }
 
 .print:hover {
-    background: #2563eb;
+    background: #1d4ed8;
+    box-shadow: 0 6px 18px rgba(29,78,216,0.30);
 }
 
 .container {
@@ -254,14 +274,14 @@ td {
 
 
 <a href="{% if session.get('admin_logged_in') %}/admin{% else %}/generate-challan{% endif %}" class="button back">
-    Back to Dashboard
+    ← Back to Dashboard
 </a>
 
 <button
     onclick="window.print()"
     class="button print"
 >
-    Print All Challans
+    🖨️ Print All Challans
 </button>
 
 
