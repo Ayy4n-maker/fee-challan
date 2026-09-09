@@ -191,5 +191,19 @@ def download_backup():
     return send_file(output, as_attachment=True, download_name=filename, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
+@app.after_request
+def _add_backup_button(response):
+    if request.path == "/admin" and response.status_code == 200 and response.content_type.startswith("text/html"):
+        try:
+            html = response.get_data(as_text=True)
+            marker = "<!-- System -->"
+            if marker in html and "/admin/backup" not in html:
+                block = '<!-- Backup & Reports -->\n        <div class="btn-group">\n            <div class="group-label">💾 Backup & Reports</div>\n            <div class="btn-row">\n                <a href="/admin/backup" class="btn btn-teal">📥 Excel Backup & Reports</a>\n            </div>\n        </div>\n\n\n        '
+                response.set_data(html.replace(marker, block + marker, 1))
+        except Exception as exc:
+            print(f"Backup dashboard injection error: {exc}")
+    return response
+
+
 if __name__ == "__main__":
     app.run(debug=True)
