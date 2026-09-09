@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backup & Reports | IESC</title>
+<style>
+* { box-sizing: border-box; }
+body { margin:0; font-family:Arial,sans-serif; background:linear-gradient(135deg,#f5f7fb,#eef2f7); color:#1f2937; padding:30px 15px 50px; }
+.container { max-width:900px; margin:auto; }
+.card { background:white; border-radius:16px; padding:28px; margin-bottom:20px; box-shadow:0 8px 25px rgba(15,23,42,.08); }
+.header { text-align:center; }
+.logo { width:75px; height:75px; object-fit:contain; }
+h1 { margin:10px 0 5px; color:#1e3a8a; font-size:25px; }
+.subtitle { color:#64748b; font-size:14px; }
+.section-title { font-size:18px; font-weight:700; color:#1e3a8a; margin-bottom:16px; }
+.info { background:#f8fafc; border-radius:10px; padding:14px; line-height:1.7; font-size:14px; margin-bottom:20px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
+select { width:100%; padding:11px 12px; border:1px solid #cbd5e1; border-radius:9px; background:white; font-size:14px; }
+.btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+.btn { display:inline-flex; align-items:center; justify-content:center; padding:11px 18px; border-radius:10px; font-size:13px; font-weight:600; text-decoration:none; border:none; cursor:pointer; }
+.btn-navy { background:#1e3a8a; color:white; }
+.btn-green { background:#16a34a; color:white; }
+.btn-blue { background:#2563eb; color:white; }
+.btn-light { background:#e0e7ff; color:#1e3a8a; }
+.note { color:#64748b; font-size:12px; margin-top:12px; }
+@media(max-width:600px){ .form-grid{grid-template-columns:1fr;} .card{padding:20px;} }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card header">
+<img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="IESC Logo">
+<h1>Backup & Reports</h1>
+<div class="subtitle">IESC — Fee Management System</div>
+</div>
+
+<div class="card">
+<div class="section-title">📦 Complete Backup</div>
+<div class="info">Download the complete Excel backup containing all records available for this account from the beginning up to the latest data. The backup is generated directly from the live website database.</div>
+<div class="btn-row">
+<a href="{{ url_for('download_backup', backup_type='complete') }}" class="btn btn-navy">⬇️ Download Complete Backup</a>
+</div>
+</div>
+
+<div class="card">
+<div class="section-title">📅 Monthly Backup</div>
+<div class="info">Choose a month and download an Excel backup containing the records and financial information for that month.</div>
+<form method="GET" action="{{ url_for('download_backup') }}">
+<input type="hidden" name="backup_type" value="monthly">
+<div class="form-grid">
+<div><label for="month">Month</label><select name="month" id="month" required>{% for m in range(1,13) %}<option value="{{ m }}" {% if m == current_month %}selected{% endif %}>{{ month_names[m-1] }}</option>{% endfor %}</select></div>
+<div><label for="year">Year</label><select name="year" id="year" required>{% for y in years %}<option value="{{ y }}" {% if y == current_year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></div>
+</div>
+<div class="btn-row"><button type="submit" class="btn btn-green">⬇️ Download Monthly Backup</button></div>
+</form>
+</div>
+
+<div class="card">
+<div class="section-title">📊 Reports Included</div>
+<div class="info">Students • Teachers • Fee Payments • Challans • Expenses • Monthly Revenue • Revenue Sources • Profit & Loss • Summary</div>
+<div class="btn-row"><a href="{{ url_for('admin') }}" class="btn btn-light">← Back to Admin Dashboard</a></div>
+<div class="note">Passwords and private authentication secrets are never included in Excel backups.</div>
+</div>
+</div>
+</body>
+</html>
